@@ -1,0 +1,163 @@
+/* web/css/register.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Orbitron', sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background: radial-gradient(circle at top, #0a0a0a, #111111);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.auth-container {
+    background: #1a1a1a;
+    padding: 2.5rem 2rem;
+    border-radius: 16px;
+    width: 360px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 0 40px rgba(0, 255, 255, 0.15), 0 0 80px rgba(0, 255, 255, 0.1);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+/* Titles */
+.auth-container h1 {
+    color: #00fff7;
+    font-size: 1.7rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    animation: neonPulse 2.5s infinite alternate;
+}
+
+/* Labels */
+label {
+    align-self: flex-start;
+    margin-bottom: 0.3rem;
+    color: #0ff;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+/* Inputs */
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+    width: 100%;
+    padding: 0.7rem;
+    margin-bottom: 1rem;
+    border: none;
+    border-radius: 8px;
+    background: #111;
+    color: #fff;
+    font-size: 0.95rem;
+    outline: none;
+    transition: 0.2s;
+    border: 1px solid #222;
+}
+
+input:focus {
+    border-color: #00fff7;
+    box-shadow: 0 0 8px #00fff7;
+}
+
+/* Register button */
+#registerBtn {
+    width: 100%;
+    padding: 0.7rem;
+    margin-top: 0.5rem;
+    background: linear-gradient(90deg, #00fff7, #0ff);
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #000;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#registerBtn:hover {
+    box-shadow: 0 0 15px #00fff7, 0 0 30px #0ff;
+}
+
+/* Back button */
+#loginBtn {
+    width: 100%;
+    margin-top: 0.7rem;
+    padding: 0.6rem;
+    background: transparent;
+    border: 1px solid #00fff7;
+    border-radius: 8px;
+    color: #0ff;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#loginBtn:hover {
+    background: #00fff7;
+    color: #000;
+    box-shadow: 0 0 15px #00fff7;
+}
+
+/* Terms */
+.terms-check {
+    width: 100%;
+    margin-top: 1rem;
+    margin-bottom: 1.2rem;
+    font-size: 0.75rem;
+    color: #aaa;
+}
+
+.terms-check label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #aaa;
+}
+
+.terms-check input {
+    accent-color: #00fff7;
+    cursor: pointer;
+}
+
+.terms-check a {
+    color: #0ff;
+    text-decoration: none;
+}
+
+.terms-check a:hover {
+    text-shadow: 0 0 5px #0ff;
+}
+
+/* Footer */
+address {
+    font-size: 0.7rem;
+    color: #555;
+    margin-top: 1.5rem;
+    text-align: center;
+    line-height: 1.4;
+}
+
+address a {
+    color: #0ff;
+    text-decoration: none;
+}
+
+address a:hover {
+    text-shadow: 0 0 5px #0ff;
+}
+
+/* Animation */
+@keyframes neonPulse {
+    0%, 100% { text-shadow: 0 0 5px #00fff7, 0 0 10px #0ff; }
+    50% { text-shadow: 0 0 20px #00fff7, 0 0 40px #0ff; }
+}

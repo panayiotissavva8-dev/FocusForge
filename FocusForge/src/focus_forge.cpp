@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -11,7 +12,7 @@
 #include <ctime>
 
 
-sqlite3* db_prodexa = nullptr;
+sqlite3* db_focus_forge = nullptr;
 const std::string DB_PATH = "build/focus_forge.sqlite"; 
 
 using namespace std;
@@ -41,16 +42,16 @@ struct SessionData {
     int user_id;
 };
 
-std::unordered_map<std::string, <SessionData> sessions;
+std::unordered_map<std::string, SessionData> sessions;
 
 // --- UTILITY FUNCTIONS ---
-string hashPassword(const string& pasword){
+string hashPassword(const string& password){
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256  ((unsigned char*)password.c_str(), password.size(), hash);
 
     stringstream ss; 
     for(int i = 0; i < SHA256_DIGEST_LENGTH; i++)
-       ss << hex << setw(2) << setfill('0' << (int)hash[i]);
+       ss << hex << setw(2) << setfill('0') << (int)hash[i];
        return ss.str();
 }
 
@@ -111,15 +112,15 @@ void loadSubjects(sqlite3* db, vector<SubjectData>& subjects, const int user_id)
         cerr<<"Prepare failed"<<endl;
         return;
     }
-    sqlite3_bind_int(stmt, 1, user_id,);
+    sqlite3_bind_int(stmt, 1, user_id);
 
     while(sqlite3_step(stmt) == SQLITE_ROW){
         SubjectData s;
         s.subject_id = sqlite3_column_int(stmt, 0);
         s.user_id = sqlite3_column_int(stmt, 1);
-        s.name = sqlite3_column_text(stmt, 2);
+        s.name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
         s.difficulty = sqlite3_column_int(stmt, 3);
-        s.deadline = sqlite3_column_text(stmt, 4);
+        s.deadline = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
         s.completed = sqlite3_column_int(stmt, 5);
         s.grade = sqlite3_column_double(stmt, 6);
 
@@ -129,7 +130,7 @@ void loadSubjects(sqlite3* db, vector<SubjectData>& subjects, const int user_id)
     sqlite3_finalize(stmt);
 }
 
-void isertSubject(sqlite3* db, const SubjectData& s){
+void insertSubject(sqlite3* db, const SubjectData& s){
     sqlite3_stmt* stmt;
     const char* sql = "INSERT INTO subjects (user_id, name, difficulty, deadline, completed, grade) VALUES (?, ?, ?, ?, ?, ?);";
 
@@ -140,7 +141,7 @@ void isertSubject(sqlite3* db, const SubjectData& s){
 
     sqlite3_bind_int(stmt, 1, s.user_id);
     sqlite3_bind_text(stmt, 2, s.name.c_str(), -1, SQLITE_TRANSIENT);
-    sqite3_bind_int(stmt, 3, s.difficulty);
+    sqlite3_bind_int(stmt, 3, s.difficulty);
     sqlite3_bind_text(stmt, 4, s.deadline.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_int(stmt, 5, s.completed);
     sqlite3_bind_double(stmt, 6, s.grade);
@@ -174,10 +175,10 @@ void loadUsers(sqlite3* db, vector<UserData>& users, const string username){
 
     while(sqlite3_step(stmt) == SQLITE_ROW){
         UserData u;
-        u.user_id = sqlite_column_int(stmt, 0);
+        u.user_id = sqlite3_column_int(stmt, 0);
         u.owner = username; 
-        u.password_hash =sqlite3_column_text(stmt, 1);
-        u.email = sqlite3_column_text(stmt, 2);
+        u.password_hash = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+        u.email = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
         u.termsAccepted = sqlite3_column_int(stmt, 3);
         u.terms_accepted_at = sqlite3_column_int(stmt, 4);
 
@@ -232,7 +233,7 @@ int main(){
     crow::SimpleApp app;
 
     CROW_ROUTE(app, "/")([]{
-        ifstream file("web/html/login.html")
+        ifstream file("web/html/login.html");
         if(!file.is_open()) return crow::response(404);
         stringstream buffer;
         buffer << file.rdbuf();
@@ -248,19 +249,212 @@ int main(){
         string password = body["password"].s();
         string input_hash = hashPassword(password);
 
-        loadUsers(db, username);
+        vector<UserData> users;
+        loadUsers(db_focus_forge, users, username);
 
-        if(db_hash == input_hash){
+        if(users.empty()){
+            return crow::response(404, "User not found");
+        }
+        UserData u = users[0];
+        if(u.password_hash == input_hash){
             string token = username + "-" + to_string(chrono::system_clock::now().time_since_epoch().count());
-            sessions[token] = {username, user_id};
+            sessions[token] = {username, u.user_id};
 
+            crow::json::wvalue res;
             res["status"] = "success";
             res["username"] = username;
             res["token"] = token;
 
             return crow::response(res);
-
+        }else{
+            return crow::response(401, "Invalid password");
         }
     });
+
+    // --- REGISTER API ---
+    CROW_ROUTE(app, "/register").methods(crow::HTTPMethod::POST)([](const crow::request& req){
+        auto body = crow::json::load(req.body);
+        if(!body) return crow::response(400);
+
+        string username = body["username"].s();
+        string owner = username;
+        string password = body["password"].s();
+        string confirm_password = body["confirm_password"].s();
+        string email = body["email"].s();
+        bool termsAccepted = body["termsAccepted"].b();
+        string hashed = hashPassword(password);
+        time_t terms_accepted_at = time(nullptr);
+
+        if(password != confirm_password){
+            return crow::response(400, "Passwords do not match");
+        }
+
+        if(!termsAccepted){
+            return crow::response(400, "Terms must be accepted");
+        }
+
+        UserData u;
+        u.owner = username;
+        u.username = username;
+        u.password_hash = hashed; 
+        u.email = email;
+        u.termsAccepted = termsAccepted;
+        u.terms_accepted_at = terms_accepted_at;
+
+        insertUser(db_focus_forge, u);
+
+        return crow::response(200, "Register Successfully");
+    });
+
+
+    // --- SUBJECTS API ---
+    CROW_ROUTE(app, "/dashboard").methods(crow::HTTPMethod::GET)([](const crow::request& req){
+
+        auto token = req.get_header_value("Authorization");
+        if(token.empty() || sessions.find(token) == sessions.end())
+           return crow::response(401, "Not logged in");
+        
+        string username = sessions[token].username;
+        int user_id = sessions[token].user_id;
+
+        vector<SubjectData> subjects;
+        loadSubjects(db_focus_forge, subjects, user_id);
+
+        crow::json::wvalue out;
+        out["subjects"] = crow::json::wvalue::list();
+
+        int i =0;
+        for(const auto& s : subjects){
+            crow::json::wvalue obj;
+
+            string diff;
+            if(s.difficulty == 0) diff = "NONE";
+            else if(s.difficulty == 1) diff = "LOW";
+            else if(s.difficulty == 2) diff = "MEDIUM";
+            else diff = "HIGH";
+
+            obj["subject"] = s.name;
+            obj["difficulty"] = diff;
+            obj["deadline"] = s.deadline;
+            obj["completed"] = s.completed;
+            obj["grade"] = s.grade;
+
+            out["subjects"][i++] = std::move(obj);
+        }
+
+        return crow::response(200, out);
+    });
+
+
+    // --- ADD SUBJECT API ---
+    CROW_ROUTE(app, "/add_subject").methods(crow::HTTPMethod::POST)([](const crow::request& req){
+        auto body = crow::json::load(req.body);
+        if(!body) return crow::response(400);
+
+        auto token = req.get_header_value("Authorization");
+        if(token.empty() || sessions.find(token) == sessions.end())
+           return crow::response(401, "Not logged in");
+
+        string username = sessions[token].username;
+        int user_id = sessions[token].user_id;
+
+          SubjectData s;
+          s.user_id = sessions[token].user_id;
+          s.name = body["name"].s();
+          s.difficulty = body["difficulty"].i();
+          s.deadline = body["deadline"].s();
+          s.completed = body["completed"].i();
+          s.grade = body["grade"].d();
+
+          insertSubject(db_focus_forge, s);
+
+          return crow::response(200, "Subject added");
+
+    });
+
+
+    // --- PATHS --- 
+
+    // --- LOGIN PAGE ---
+    CROW_ROUTE(app, "/login")([](){
+        ifstream file("web/html/login.html", ios::binary);
+        if(!file.is_open()) return crow::response(404, "Cannot open login.html");
+
+        stringstream buffer;
+        buffer<<file.rdbuf();
+        crow::response res(buffer.str());
+        res.add_header("Content-Type", "text/html");
+        return res;
+    });
+
+
+    // --- REGISTER PAGE ---
+    CROW_ROUTE(app, "/register")([](){
+        ifstream file("web/html/register.html", ios::binary);
+        if(!file.is_open()) return crow::response(404, "Cannot open register.html");
+
+        stringstream buffer;
+        buffer<<file.rdbuf();
+        crow::response res(buffer.str());
+        res.add_header("Content-Type", "text/html");
+        return res;
+    });
+
+
+    // --- STATIC FILES ---
+    app.route_dynamic("/web/<path>")([](const crow::request& req, std::string path){
+
+    std::string full_path = "web/" + path;
+
+    std::ifstream file(full_path, std::ios::binary);
+    if (!file)
+        return crow::response(404, "File not found");
+
+    std::ostringstream contents;
+    contents << file.rdbuf();
+
+    crow::response res(contents.str());
+
+    std::string mime_type = "application/octet-stream";
+    size_t dot_pos = path.rfind('.');
+
+    if (dot_pos != std::string::npos) {
+        std::string ext = path.substr(dot_pos);
+
+        if (ext == ".html") mime_type = "text/html";
+        else if (ext == ".css") mime_type = "text/css";
+        else if (ext == ".js") mime_type = "application/javascript";
+        else if (ext == ".png") mime_type = "image/png";
+        else if (ext == ".jpg" || ext == ".jpeg") mime_type = "image/jpeg";
+        else if (ext == ".gif") mime_type = "image/gif";
+    }
+
+    res.add_header("Content-Type", mime_type);
+    return res;
+});
+
+
+    // --- RUN SERVER --- 
+    int port = 5001;
+    if(const char* env_p = getenv("PORT")){
+        port = stoi(env_p);
+    }
+
+    app.bindaddr("0.0.0.0").port(port).multithreaded().run();
+
+    sqlite3_close(db_focus_forge);
+
+    return 0;
     
 }
+
+// IGNORE
+// --- COMPILE COMMAND ---
+/* g++ -std=c++17 src/focus_forge.cpp -o focusforge \
+-I Crow/include \
+-I /opt/homebrew/include \
+-I /opt/homebrew/opt/openssl@3/include \
+-L /opt/homebrew/opt/openssl@3/lib \
+-lsqlite3 -lssl -lcrypto -lpthread
+./focusforge
+*/
