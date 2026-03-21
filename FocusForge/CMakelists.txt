@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.10)
+project(FocusForge)
+
+set(CMAKE_CXX_STANDARD 17)
+
+include_directories(
+    include
+    Crow/include
+    json/include
+)
+
+find_package(SQLite3 REQUIRED)
+
+add_executable(focusforge
+    src/main.cpp
+    src/routes.cpp
+    src/scheduler.cpp
+    src/storage.cpp
+)
+
+target_link_libraries(focusforge SQLite::SQLite3)
