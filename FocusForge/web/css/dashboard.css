@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Orbitron', sans-serif;
+}
+
+body {
+    background: radial-gradient(circle at top, #0a0a0a, #111111);
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.dashboard-container {
+    width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Title */
+h1 {
+    text-align: center;
+    color: #00fff7;
+    animation: neonPulse 2.5s infinite alternate;
+}
+
+/* Cards */
+.card {
+    background: #1a1a1a;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(0,255,255,0.2);
+    box-shadow: 0 0 25px rgba(0,255,255,0.1);
+}
+
+/* Inputs */
+input, select {
+    width: 100%;
+    padding: 0.6rem;
+    margin-bottom: 0.8rem;
+    border-radius: 8px;
+    border: 1px solid #222;
+    background: #111;
+    color: #fff;
+    outline: none;
+}
+
+input:focus, select:focus {
+    border-color: #00fff7;
+    box-shadow: 0 0 6px #00fff7;
+}
+
+/* Button */
+#addBtn {
+    width: 100%;
+    padding: 0.7rem;
+    background: linear-gradient(90deg, #00fff7, #0ff);
+    border: none;
+    border-radius: 8px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#addBtn:hover {
+    box-shadow: 0 0 15px #00fff7;
+}
+
+/* Subject items */
+.subject {
+    padding: 0.8rem;
+    border-bottom: 1px solid #222;
+}
+
+.subject:last-child {
+    border-bottom: none;
+}
+
+.subject h3 {
+    color: #0ff;
+}
+
+.subject p {
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+/* Animation */
+@keyframes neonPulse {
+    0%,100% { text-shadow: 0 0 5px #00fff7, 0 0 10px #0ff; }
+    50% { text-shadow: 0 0 20px #00fff7, 0 0 40px #0ff; }
+}

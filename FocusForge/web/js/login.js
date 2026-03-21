@@ -1,3 +1,4 @@
+document.addEventListener("DOMContentLoaded", () => {
 const signBtn = document.getElementById("sign");
 const registerBtn = document.getElementById("register");
 
@@ -5,18 +6,21 @@ signBtn.addEventListener("click", async () => {
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value.trim();
 
-    if (!username || !password) return alert("Enter username and password");
 
+    if (!username || !password){
+        alert("Enter username and password");
+        return;
+    }
     try{
-        const response = await fetch("/login", {
+        const response = await fetch("/login_api", {
             method: "POST",
-            headers: {"Content-Type": "aplication/json"},
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify({username,password})
         });
 
         if(response.ok){
             const data = await response.json();
-            localStorage.setItem("sessionToken", data);
+            localStorage.setItem("sessionToken", data.token);
             localStorage.setItem("user_id", data.user_id);
             window.location.href = "/dashboard";
         }else{
@@ -32,4 +36,5 @@ signBtn.addEventListener("click", async () => {
 
 registerBtn.addEventListener("click", () =>{
     window.location.href = "/register";
+});
 });

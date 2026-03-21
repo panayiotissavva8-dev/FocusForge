@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>FocusForge Dashboard</title>
+        <link rel="stylesheet" href="/web/css/dashboard.css">
+        <script type="module" src="/web/js/dashboard.js" defer></script>
+    </head>
+    <body>
+        <div class="dashboard-container">
+
+            <h1>Dashboard</h1>
+
+            <div class="card">
+                <h2>Add Subject</h2>
+
+                <input type="text" id="name" placeholder="Subject Name">
+
+                <select id="difficulty">
+                    <option value="0">NONE</option>
+                    <option value="1">LOW</option>
+                    <option value="2">MEDIUM</option>
+                    <option value="3">HIGH</option>
+                </select>
+
+                <input type="date" id="deadline">
+
+                <input type="number" id="grade" placeholder="Expected Grade">
+
+                <button id="addBtn">Add Subject</button>
+            </div>
+
+            <div class="card">
+                <h2>Your Subjects</h2>
+
+                <div id="subjectsList"></div>
+            </div>
+
+        </div>
+    </body>
+</html>

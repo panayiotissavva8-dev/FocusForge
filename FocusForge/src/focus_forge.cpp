@@ -241,7 +241,7 @@ int main(){
     });
 
     // --- LOGIN API ---
-    CROW_ROUTE(app, "/login").methods(crow::HTTPMethod::POST)([](const crow::request& req){
+    CROW_ROUTE(app, "/login_api").methods(crow::HTTPMethod::POST)([](const crow::request& req){
         auto body = crow::json::load(req.body);
         if(!body) return crow::response(400);
 
@@ -258,11 +258,12 @@ int main(){
         UserData u = users[0];
         if(u.password_hash == input_hash){
             string token = username + "-" + to_string(chrono::system_clock::now().time_since_epoch().count());
-            sessions[token] = {username, u.user_id};
+            sessions[token] = SessionData{username, u.user_id};
 
             crow::json::wvalue res;
             res["status"] = "success";
             res["username"] = username;
+            res["user_id"] = u.user_id;
             res["token"] = token;
 
             return crow::response(res);
@@ -272,7 +273,7 @@ int main(){
     });
 
     // --- REGISTER API ---
-    CROW_ROUTE(app, "/register").methods(crow::HTTPMethod::POST)([](const crow::request& req){
+    CROW_ROUTE(app, "/register_api").methods(crow::HTTPMethod::POST)([](const crow::request& req){
         auto body = crow::json::load(req.body);
         if(!body) return crow::response(400);
 
@@ -308,12 +309,11 @@ int main(){
 
 
     // --- SUBJECTS API ---
-    CROW_ROUTE(app, "/dashboard").methods(crow::HTTPMethod::GET)([](const crow::request& req){
+    CROW_ROUTE(app, "/dashboard_api").methods(crow::HTTPMethod::GET)([](const crow::request& req){
 
         auto token = req.get_header_value("Authorization");
         if(token.empty() || sessions.find(token) == sessions.end())
            return crow::response(401, "Not logged in");
-        
         string username = sessions[token].username;
         int user_id = sessions[token].user_id;
 
@@ -347,16 +347,15 @@ int main(){
 
 
     // --- ADD SUBJECT API ---
-    CROW_ROUTE(app, "/add_subject").methods(crow::HTTPMethod::POST)([](const crow::request& req){
+    CROW_ROUTE(app, "/add_subject_api").methods(crow::HTTPMethod::POST)([](const crow::request& req){
         auto body = crow::json::load(req.body);
         if(!body) return crow::response(400);
 
         auto token = req.get_header_value("Authorization");
         if(token.empty() || sessions.find(token) == sessions.end())
            return crow::response(401, "Not logged in");
-
-        string username = sessions[token].username;
-        int user_id = sessions[token].user_id;
+         string username = sessions[token].username;
+         int user_id = sessions[token].user_id;
 
           SubjectData s;
           s.user_id = sessions[token].user_id;
@@ -392,6 +391,18 @@ int main(){
     CROW_ROUTE(app, "/register")([](){
         ifstream file("web/html/register.html", ios::binary);
         if(!file.is_open()) return crow::response(404, "Cannot open register.html");
+
+        stringstream buffer;
+        buffer<<file.rdbuf();
+        crow::response res(buffer.str());
+        res.add_header("Content-Type", "text/html");
+        return res;
+    });
+
+    // --- DASHBOARD PAGE ---
+    CROW_ROUTE(app, "/dashboard")([](){
+        ifstream file("web/html/dashboard.html", ios::binary);
+        if(!file.is_open()) return crow::response(404, "Cannot open dashboard.html");
 
         stringstream buffer;
         buffer<<file.rdbuf();
