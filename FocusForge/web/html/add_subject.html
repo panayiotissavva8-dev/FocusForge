@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>FocusForge ADD TEST</title>
+        <link rel="stylesheet" href="/web/css/add_subject.css">
+        <script type="module" src="/web/js/add_subject.js" defer></script>
+        <link rel="stylesheet" href="/web/css/menu_bar.css">
+        <script type="module" src="/web/js/menu_bar.js" defer></script>
+    </head>
+    <body>
+
+         <div id="menu-container"></div>
+
+        <div class="dashboard-container">
+
+
+            <h1>Dashboard</h1>
+
+            <div class="card">
+                <h2>Add Test</h2>
+
+                <input type="text" id="name" placeholder="Subject Name">
+
+                <select id="difficulty">
+                    <option value="0">NONE</option>
+                    <option value="1">LOW</option>
+                    <option value="2">MEDIUM</option>
+                    <option value="3">HIGH</option>
+                </select>
+
+                <input type="date" id="deadline">
+
+                <button id="addBtn">Add Test</button>
+            </div>
+
+        </div>
+    </body>
+</html>

@@ -3,6 +3,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const loginBtn = document.getElementById("loginBtn");
     const termsCheckbox = document.getElementById("termsCheckbox");
 
+    registerBtn.disabled=true;
+
+    termsCheckbox.addEventListener("change", () => {
+               registerBtn.disabled = !termsCheckbox.checked;
+            });
+
     registerBtn.addEventListener("click", async (e) => {
         if(!termsCheckbox.checked) {
             e.preventDefault();
@@ -47,6 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Could not connect to server");
         }
     });
+
 
     loginBtn.addEventListener("click", () => {
         window.location.href = "/login";

@@ -1,42 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>FocusForge Dashboard</title>
-        <link rel="stylesheet" href="/web/css/dashboard.css">
-        <script type="module" src="/web/js/dashboard.js" defer></script>
-    </head>
-    <body>
-        <div class="dashboard-container">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusForge - Dashboard</title>
+    <link rel="stylesheet" href="/web/css/dashboard.css">
+</head>
+<body>
+    <!-- Menu Bar Container (loaded from backend) -->
+    <div id="menu-container"></div>
 
-            <h1>Dashboard</h1>
-
-            <div class="card">
-                <h2>Add Subject</h2>
-
-                <input type="text" id="name" placeholder="Subject Name">
-
-                <select id="difficulty">
-                    <option value="0">NONE</option>
-                    <option value="1">LOW</option>
-                    <option value="2">MEDIUM</option>
-                    <option value="3">HIGH</option>
-                </select>
-
-                <input type="date" id="deadline">
-
-                <input type="number" id="grade" placeholder="Expected Grade">
-
-                <button id="addBtn">Add Subject</button>
+    <!-- Menu Bar (fallback/additional controls) -->
+    <div class="menubar">
+        <div class="container">
+            <div class="menubar-content">
+                <div class="brand">
+                    <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                        <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                    </svg>
+                    <div>
+                        <h1>FocusForge</h1>
+                        <p class="subtitle">Manage your upcoming exams</p>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="openDialog()">
+                    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Add Exam
+                </button>
             </div>
-
-            <div class="card">
-                <h2>Your Subjects</h2>
-
-                <div id="subjectsList"></div>
-            </div>
-
         </div>
-    </body>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tabs-list">
+                    <button class="tab-trigger active" onclick="switchTab('upcoming')">
+                        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                        </svg>
+                        Upcoming (<span id="upcoming-count">0</span>)
+                    </button>
+                    <button class="tab-trigger" onclick="switchTab('completed')">
+                        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                        Completed (<span id="completed-count">0</span>)
+                    </button>
+                </div>
+
+                <!-- Upcoming Tab Content -->
+                <div id="upcoming-tab" class="tab-content active">
+                    <div id="upcoming-exams" class="exam-grid">
+                        <!-- Empty state -->
+                        <div class="empty-state">
+                            <svg class="icon icon-xl empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                            </svg>
+                            <h3>No upcoming exams</h3>
+                            <p>Add your first exam to get started tracking your studies</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Completed Tab Content -->
+                <div id="completed-tab" class="tab-content">
+                    <div id="completed-exams" class="exam-grid">
+                        <!-- Empty state -->
+                        <div class="empty-state">
+                            <svg class="icon icon-xl empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <h3>No completed exams</h3>
+                            <p>Mark exams as completed to see them here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dialog/Modal -->
+    <div id="exam-dialog" class="dialog-overlay">
+        <div class="dialog-content">
+            <div class="dialog-header">
+                <h2 id="dialog-title">Add New Exam</h2>
+                <p id="dialog-description">Enter the details of your upcoming exam.</p>
+            </div>
+            <form id="exam-form" class="dialog-body">
+                <div class="form-group">
+                    <label for="subject">Subject Name</label>
+                    <input type="text" id="subject" class="input" placeholder="e.g., Mathematics" required>
+                </div>
+                <div class="form-group">
+                    <label for="deadline">Exam Date</label>
+                    <input type="date" id="deadline" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="difficulty">Difficulty Level</label>
+                    <select id="difficulty" class="select">
+                        <option value="none">None</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="completed" class="checkbox">
+                    <label for="completed">Mark as completed</label>
+                </div>
+                <div id="grade-group" class="form-group" style="display: none;">
+                    <label for="grade">Grade (optional)</label>
+                    <input type="text" id="grade" class="input" placeholder="e.g., A+, 95%, etc.">
+                </div>
+            </form>
+            <div class="dialog-footer">
+                <button type="button" class="btn btn-outline" onclick="closeDialog()">Cancel</button>
+                <button type="submit" form="exam-form" class="btn btn-primary" id="submit-btn">Add Exam</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/web/js/dashboard.js"></script>
+</body>
 </html>

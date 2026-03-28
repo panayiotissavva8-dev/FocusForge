@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>FocusForge - Register</title>
         <link rel="stylesheet" href="/web/css/register.css">
+        <link rel="stylesheet" href="/web/css/dashboard.css">
         <script type="module" src="/web/js/register.js" defer></script>
     </head>
     <body>
@@ -24,13 +25,17 @@
             <label for="email">Email</label>
             <input type="email" id="email" required>
 
-            <input id="registerBtn" type="submit" value="Register">
-            <input id="loginBtn" type="button" value="Back to Login">
+            <div class="tooltip-wrapper">
+                <button class="btn btn-primary btn-full" id="registerBtn" disabled>Register</button>
+                <span class="tooltip-text">Accept terms and contitions to register</span>
+            </div>
+
+            <button class="btn btn-outline btn-full" id="loginBtn">Back to Login</button>
 
             <div class="terms-check">
 
                 <label>
-                    <input type="checkbox" id="termsCheckbox">
+                    <input type="checkbox" id="termsCheckbox" required>
                     <span>
                         I agree to
                         <a href="/web/html/terms.html" target="_blank">Terms and Conditions</a>

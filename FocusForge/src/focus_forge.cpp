@@ -34,7 +34,7 @@ struct SubjectData {
     int difficulty;
     string deadline;
     int completed;
-    double grade;
+    string grade;  
 };
 
 struct SessionData {
@@ -55,6 +55,25 @@ string hashPassword(const string& password){
        return ss.str();
 }
 
+// Convert difficulty string to integer
+int difficultyToInt(const string& diff) {
+    string lower = diff;
+    transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    if(lower == "none") return 0;
+    else if(lower == "low") return 1;
+    else if(lower == "medium") return 2;
+    else if(lower == "high") return 3;
+    return 0; // default to none
+}
+
+// Convert difficulty integer to string
+string difficultyToString(int diff) {
+    if(diff == 0) return "none";
+    else if(diff == 1) return "low";
+    else if(diff == 2) return "medium";
+    else if(diff == 3) return "high";
+    return "none";
+}
 
 // --- DATABASE FUNCTIONS ---
 
@@ -83,7 +102,7 @@ void initializeDatabase(sqlite3* db){
             difficulty INTEGER NOT NULL,
             deadline TEXT,
             completed INTEGER,
-            grade REAL, 
+            grade TEXT, 
             FOREIGN KEY(user_id) REFERENCES users(user_id)
             );
 )";
@@ -99,7 +118,7 @@ if(errMsg != nullptr){
 
 }
 
-// --- USER FUNCTIONS ---
+// --- SUBJECT FUNCTIONS ---
 void loadSubjects(sqlite3* db, vector<SubjectData>& subjects, const int user_id){
     sqlite3_stmt* stmt;
     const char* sql;
@@ -120,9 +139,14 @@ void loadSubjects(sqlite3* db, vector<SubjectData>& subjects, const int user_id)
         s.user_id = sqlite3_column_int(stmt, 1);
         s.name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
         s.difficulty = sqlite3_column_int(stmt, 3);
-        s.deadline = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
+        
+        const char* deadline = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
+        s.deadline = deadline ? deadline : "";
+        
         s.completed = sqlite3_column_int(stmt, 5);
-        s.grade = sqlite3_column_double(stmt, 6);
+        
+        const char* grade = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
+        s.grade = grade ? grade : "";
 
         subjects.push_back(s);
     }
@@ -144,7 +168,7 @@ void insertSubject(sqlite3* db, const SubjectData& s){
     sqlite3_bind_int(stmt, 3, s.difficulty);
     sqlite3_bind_text(stmt, 4, s.deadline.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_int(stmt, 5, s.completed);
-    sqlite3_bind_double(stmt, 6, s.grade);
+    sqlite3_bind_text(stmt, 6, s.grade.c_str(), -1, SQLITE_TRANSIENT);
 
     int rc = sqlite3_step(stmt);
 
@@ -155,8 +179,57 @@ void insertSubject(sqlite3* db, const SubjectData& s){
     }
 
     sqlite3_finalize(stmt);
+}
 
+void updateSubject(sqlite3* db, const SubjectData& s){
+    sqlite3_stmt* stmt;
+    const char* sql = "UPDATE subjects SET name = ?, difficulty = ?, deadline = ?, completed = ?, grade = ? WHERE subject_id = ? AND user_id = ?;";
 
+    if(sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK){
+        cerr<<"Prepare failed: "<<sqlite3_errmsg(db)<<endl;
+        return;
+    }
+
+    sqlite3_bind_text(stmt, 1, s.name.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 2, s.difficulty);
+    sqlite3_bind_text(stmt, 3, s.deadline.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 4, s.completed);
+    sqlite3_bind_text(stmt, 5, s.grade.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 6, s.subject_id);
+    sqlite3_bind_int(stmt, 7, s.user_id);
+
+    int rc = sqlite3_step(stmt);
+
+    if(rc != SQLITE_DONE){
+        cerr<<"Update failed: "<<sqlite3_errmsg(db)<<endl; 
+    }else {
+        cout<<"Update success"<<endl;
+    }
+
+    sqlite3_finalize(stmt);
+}
+
+void deleteSubject(sqlite3* db, int subject_id, int user_id){
+    sqlite3_stmt* stmt;
+    const char* sql = "DELETE FROM subjects WHERE subject_id = ? AND user_id = ?;";
+
+    if(sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK){
+        cerr<<"Prepare failed: "<<sqlite3_errmsg(db)<<endl;
+        return;
+    }
+
+    sqlite3_bind_int(stmt, 1, subject_id);
+    sqlite3_bind_int(stmt, 2, user_id);
+
+    int rc = sqlite3_step(stmt);
+
+    if(rc != SQLITE_DONE){
+        cerr<<"Delete failed: "<<sqlite3_errmsg(db)<<endl; 
+    }else {
+        cout<<"Delete success"<<endl;
+    }
+
+    sqlite3_finalize(stmt);
 }
 
 
@@ -232,7 +305,7 @@ int main(){
 
     crow::SimpleApp app;
 
-    CROW_ROUTE(app, "/")([]{
+    CROW_ROUTE(app, "/")([](){
         ifstream file("web/html/login.html");
         if(!file.is_open()) return crow::response(404);
         stringstream buffer;
@@ -308,7 +381,7 @@ int main(){
     });
 
 
-    // --- SUBJECTS API ---
+    // --- GET ALL SUBJECTS API ---
     CROW_ROUTE(app, "/dashboard_api").methods(crow::HTTPMethod::GET)([](const crow::request& req){
 
         auto token = req.get_header_value("Authorization");
@@ -323,18 +396,13 @@ int main(){
         crow::json::wvalue out;
         out["subjects"] = crow::json::wvalue::list();
 
-        int i =0;
+        int i = 0;
         for(const auto& s : subjects){
             crow::json::wvalue obj;
 
-            string diff;
-            if(s.difficulty == 0) diff = "NONE";
-            else if(s.difficulty == 1) diff = "LOW";
-            else if(s.difficulty == 2) diff = "MEDIUM";
-            else diff = "HIGH";
-
+            obj["id"] = s.subject_id;
             obj["subject"] = s.name;
-            obj["difficulty"] = diff;
+            obj["difficulty"] = difficultyToString(s.difficulty);
             obj["deadline"] = s.deadline;
             obj["completed"] = s.completed;
             obj["grade"] = s.grade;
@@ -346,29 +414,78 @@ int main(){
     });
 
 
-    // --- ADD SUBJECT API ---
-    CROW_ROUTE(app, "/add_subject_api").methods(crow::HTTPMethod::POST)([](const crow::request& req){
+    // --- ADD SUBJECT API (POST) ---
+    CROW_ROUTE(app, "/dashboard_api").methods(crow::HTTPMethod::POST)([](const crow::request& req){
         auto body = crow::json::load(req.body);
-        if(!body) return crow::response(400);
+        if(!body) return crow::response(400, "Invalid JSON");
 
         auto token = req.get_header_value("Authorization");
         if(token.empty() || sessions.find(token) == sessions.end())
            return crow::response(401, "Not logged in");
-         string username = sessions[token].username;
-         int user_id = sessions[token].user_id;
+        
+        int user_id = sessions[token].user_id;
 
-          SubjectData s;
-          s.user_id = sessions[token].user_id;
-          s.name = body["name"].s();
-          s.difficulty = body["difficulty"].i();
-          s.deadline = body["deadline"].s();
-          s.completed = body["completed"].i();
-          s.grade = body["grade"].d();
+        SubjectData s;
+        s.user_id = user_id;
+        s.name = body["subject"].s();
+        s.difficulty = difficultyToInt(body["difficulty"].s());
+        s.deadline = body["deadline"].s();
+        if (body.has("grade")) {
+            std::string grade = body["grade"].s();
+            s.completed = grade.empty() ? 0 : 1;
+        } else {
+            s.completed = 0;
+        }
+        s.grade = body["grade"].s();
 
-          insertSubject(db_focus_forge, s);
+        insertSubject(db_focus_forge, s);
 
-          return crow::response(200, "Subject added");
+        return crow::response(200, "Subject added");
+    });
 
+
+    // --- UPDATE SUBJECT API (PUT) ---
+    CROW_ROUTE(app, "/dashboard_api/<int>").methods(crow::HTTPMethod::PUT)([](const crow::request& req, int subject_id){
+        auto body = crow::json::load(req.body);
+        if(!body) return crow::response(400, "Invalid JSON");
+
+        auto token = req.get_header_value("Authorization");
+        if(token.empty() || sessions.find(token) == sessions.end())
+           return crow::response(401, "Not logged in");
+        
+        int user_id = sessions[token].user_id;
+
+        SubjectData s;
+        s.subject_id = subject_id;
+        s.user_id = user_id;
+        s.name = body["subject"].s();
+        s.difficulty = difficultyToInt(body["difficulty"].s());
+        s.deadline = body["deadline"].s();
+        if (body.has("grade")) {
+           std::string grade = body["grade"].s();
+           s.completed = grade.empty() ? 0 : 1;
+        } else {
+           s.completed = 0;
+        }
+        s.grade = body["grade"].s();
+
+        updateSubject(db_focus_forge, s);
+
+        return crow::response(200, "Subject updated");
+    });
+
+
+    // --- DELETE SUBJECT API (DELETE) ---
+    CROW_ROUTE(app, "/dashboard_api/<int>").methods(crow::HTTPMethod::DELETE)([](const crow::request& req, int subject_id){
+        auto token = req.get_header_value("Authorization");
+        if(token.empty() || sessions.find(token) == sessions.end())
+           return crow::response(401, "Not logged in");
+        
+        int user_id = sessions[token].user_id;
+
+        deleteSubject(db_focus_forge, subject_id, user_id);
+
+        return crow::response(200, "Subject deleted");
     });
 
 
@@ -403,6 +520,18 @@ int main(){
     CROW_ROUTE(app, "/dashboard")([](){
         ifstream file("web/html/dashboard.html", ios::binary);
         if(!file.is_open()) return crow::response(404, "Cannot open dashboard.html");
+
+        stringstream buffer;
+        buffer<<file.rdbuf();
+        crow::response res(buffer.str());
+        res.add_header("Content-Type", "text/html");
+        return res;
+    });
+
+    // --- ADD SUBJECT PAGE ---
+    CROW_ROUTE(app, "/add_subject")([](){
+        ifstream file("web/html/add_subject.html", ios::binary);
+        if(!file.is_open()) return crow::response(404, "Cannot open add_subject.html");
 
         stringstream buffer;
         buffer<<file.rdbuf();
@@ -459,7 +588,6 @@ int main(){
     
 }
 
-// IGNORE
 // --- COMPILE COMMAND ---
 /* g++ -std=c++17 src/focus_forge.cpp -o focusforge \
 -I Crow/include \
