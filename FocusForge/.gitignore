@@ -1,0 +1,6 @@
+.env
+secret.env
+build/
+*.o
+*.out
+focusforge

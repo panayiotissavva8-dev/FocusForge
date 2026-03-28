@@ -10,6 +10,8 @@
 #include <unordered_map>
 #include <string>
 #include <ctime>
+#include <cpr/cpr.h>
+#include <nlohmann/json.hpp>
 
 
 sqlite3* db_focus_forge = nullptr;
@@ -33,6 +35,8 @@ struct SubjectData {
     string name;
     int difficulty;
     string deadline;
+    int reminder;
+    int reminder_sent = 0;
     int completed;
     string grade;  
 };
@@ -75,6 +79,50 @@ string difficultyToString(int diff) {
     return "none";
 }
 
+int reminderToInt(const string& remind) {
+    string lower = remind;
+    transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    if(lower == "none") return 0;
+    else if(lower == "1_day") return 1;
+    else if(lower == "3_days") return 2;
+    else if(lower == "1_week") return 3;
+    return 0; // default to none
+}
+
+string reminderToString(int remind) {
+    if(remind == 0) return "none";
+    else if(remind == 1) return "1_day";
+    else if(remind == 2) return "3_days";
+    else if(remind == 3) return "1_week";
+    return "none";
+}
+
+//Culculate reminder time
+time_t calculateReminders(const string& deadline, const int reminder) {
+    struct tm tm_deadline = {};
+    strptime(deadline.c_str(), "%Y-%m-%d", &tm_deadline);
+    time_t deadline_time = mktime(&tm_deadline);
+
+    if (reminder == 1) return deadline_time - 24 * 3600;
+    else if (reminder == 2) return deadline_time - 3 * 24 * 3600;
+    else if (reminder == 3) return deadline_time - 7 * 24 * 3600;
+    
+    return deadline_time; // no reminder
+}
+
+void loadEnv() {
+    std::ifstream file(".env");
+    std::string line;
+    while (getline(file, line)) {
+        auto pos = line.find('=');
+        if (pos != std::string::npos) {
+            std::string key = line.substr(0, pos);
+            std::string value = line.substr(pos + 1);
+            setenv(key.c_str(), value.c_str(), 1);
+        }
+    }
+}
+
 // --- DATABASE FUNCTIONS ---
 
 void initializeDatabase(sqlite3* db){
@@ -101,6 +149,8 @@ void initializeDatabase(sqlite3* db){
             name TEXT NOT NULL,
             difficulty INTEGER NOT NULL,
             deadline TEXT,
+            reminder INTEGER NOT NULL DEFAULT 0,
+            reminder_sent INTEGER NOT NULL DEFAULT 0,
             completed INTEGER,
             grade TEXT, 
             FOREIGN KEY(user_id) REFERENCES users(user_id)
@@ -125,7 +175,7 @@ void loadSubjects(sqlite3* db, vector<SubjectData>& subjects, const int user_id)
 
     subjects.clear();
 
-    sql = "SELECT subject_id, user_id, name, difficulty, deadline, completed, grade "
+    sql = "SELECT subject_id, user_id, name, difficulty, deadline, reminder, reminder_sent, completed, grade "
           "FROM subjects WHERE user_id = ?;";
     if(sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK){
         cerr<<"Prepare failed"<<endl;
@@ -139,13 +189,16 @@ void loadSubjects(sqlite3* db, vector<SubjectData>& subjects, const int user_id)
         s.user_id = sqlite3_column_int(stmt, 1);
         s.name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
         s.difficulty = sqlite3_column_int(stmt, 3);
-        
-        const char* deadline = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
+        s.reminder_sent = sqlite3_column_int(stmt, 4);
+
+        const char* deadline = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
         s.deadline = deadline ? deadline : "";
+
+        s.reminder = sqlite3_column_int(stmt, 6);
         
-        s.completed = sqlite3_column_int(stmt, 5);
+        s.completed = sqlite3_column_int(stmt, 7);
         
-        const char* grade = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
+        const char* grade = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8));
         s.grade = grade ? grade : "";
 
         subjects.push_back(s);
@@ -156,7 +209,7 @@ void loadSubjects(sqlite3* db, vector<SubjectData>& subjects, const int user_id)
 
 void insertSubject(sqlite3* db, const SubjectData& s){
     sqlite3_stmt* stmt;
-    const char* sql = "INSERT INTO subjects (user_id, name, difficulty, deadline, completed, grade) VALUES (?, ?, ?, ?, ?, ?);";
+    const char* sql = "INSERT INTO subjects (user_id, name, difficulty, deadline, reminder, completed, grade) VALUES (?, ?, ?, ?, ?, ?, ?);";
 
     if(sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK){
         cerr<<"Prepare failed"<<endl;
@@ -167,8 +220,9 @@ void insertSubject(sqlite3* db, const SubjectData& s){
     sqlite3_bind_text(stmt, 2, s.name.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_int(stmt, 3, s.difficulty);
     sqlite3_bind_text(stmt, 4, s.deadline.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_int(stmt, 5, s.completed);
-    sqlite3_bind_text(stmt, 6, s.grade.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 5, s.reminder);
+    sqlite3_bind_int(stmt, 6, s.completed);
+    sqlite3_bind_text(stmt, 7, s.grade.c_str(), -1, SQLITE_TRANSIENT);
 
     int rc = sqlite3_step(stmt);
 
@@ -183,7 +237,7 @@ void insertSubject(sqlite3* db, const SubjectData& s){
 
 void updateSubject(sqlite3* db, const SubjectData& s){
     sqlite3_stmt* stmt;
-    const char* sql = "UPDATE subjects SET name = ?, difficulty = ?, deadline = ?, completed = ?, grade = ? WHERE subject_id = ? AND user_id = ?;";
+    const char* sql = "UPDATE subjects SET name = ?, difficulty = ?, deadline = ?, reminder = ?, completed = ?, grade = ? WHERE subject_id = ? AND user_id = ?;";
 
     if(sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK){
         cerr<<"Prepare failed: "<<sqlite3_errmsg(db)<<endl;
@@ -193,10 +247,11 @@ void updateSubject(sqlite3* db, const SubjectData& s){
     sqlite3_bind_text(stmt, 1, s.name.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_int(stmt, 2, s.difficulty);
     sqlite3_bind_text(stmt, 3, s.deadline.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_int(stmt, 4, s.completed);
-    sqlite3_bind_text(stmt, 5, s.grade.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_int(stmt, 6, s.subject_id);
-    sqlite3_bind_int(stmt, 7, s.user_id);
+    sqlite3_bind_int(stmt, 4, s.reminder);
+    sqlite3_bind_int(stmt, 5, s.completed);
+    sqlite3_bind_text(stmt, 6, s.grade.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 7, s.subject_id);
+    sqlite3_bind_int(stmt, 8, s.user_id);
 
     int rc = sqlite3_step(stmt);
 
@@ -261,9 +316,6 @@ void loadUsers(sqlite3* db, vector<UserData>& users, const string username){
     sqlite3_finalize(stmt);
 }
 
-
-
-
 void insertUser(sqlite3* db, const UserData& u){
     sqlite3_stmt* stmt;
     const char* sql = "INSERT INTO users (owner, username, password_hash, email, termsAccepted, terms_accepted_at) VALUES (?, ?, ?, ?, ?, ?);";
@@ -292,6 +344,96 @@ void insertUser(sqlite3* db, const UserData& u){
 
 }
 
+
+const char* key = getenv("SENDGRID_API_KEY");
+std::string SENDGRID_API_KEY = key ? key : "";
+const std::string FROM_EMAIL = "focusforgereminder@gmail.com";
+
+void sendExamReminder(const std::string& userEmail, const std::string& examName,  const std::string& examDate, const std::string& examDifficulty, const std::string& examReminder, const string username) 
+{
+    nlohmann::json body = {
+        {"personalizations", {{
+            {"to", {{{"email", userEmail}}}},
+            {"subject", "Exam Reminder: " + examName}
+        }}},
+        {"from", {{"email", FROM_EMAIL}}},
+        {"content", {{
+            {"type", "text/plain"},
+            {"value", "Hi " + username +",\n\nThis is a friendly reminder that you have an upcoming exam:\n\nSubject: " + examName + "\nDate: " + examDate + "\nDifficulty: " + examDifficulty + "\nReminder set for: " + examReminder + " before the exam" + "\n\n“Success is walking from failure to failure with no loss of enthusiasm.” - Winston Churchill" + "\n\nGood luck with your studies, \nFocusForge Team"}
+        }}}
+    };
+
+    auto r = cpr::Post(
+        cpr::Url{"https://api.sendgrid.com/v3/mail/send"},
+        cpr::Header{
+            {"Authorization", "Bearer " + SENDGRID_API_KEY},
+            {"Content-Type", "application/json"}
+        },
+        cpr::Body{body.dump()}
+    );
+
+    if (r.status_code == 202) {
+        std::cout << "Email sent successfully to " << userEmail << "\n";
+    } else {
+        std::cout << "Failed to send email. Status: " << r.status_code 
+                  << " Response: " << r.text << "\n";
+    }
+}
+
+void reminderLoop(sqlite3* db) {
+    while(true) {
+        try {
+            cout << "[Reminder] Checking subjects..." << endl;
+            
+            // Load all subjects for all users
+            sqlite3_stmt* stmt;
+            const char* sql = "SELECT s.subject_id, s.user_id, s.name, s.deadline, s.reminder, s.reminder_sent, u.email "
+                              "FROM subjects s "
+                              "JOIN users u ON s.user_id = u.user_id "
+                              "WHERE s.reminder_sent = 0;";
+
+            if(sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+                cerr << "[Reminder] DB prepare failed: " << sqlite3_errmsg(db) << endl;
+                goto sleep_hour;
+            }
+
+            time_t now = time(nullptr);
+            while(sqlite3_step(stmt) == SQLITE_ROW) {
+                int subject_id = sqlite3_column_int(stmt, 0);
+                int user_id = sqlite3_column_int(stmt, 1);
+                string name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+                string deadline = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
+                int reminder = sqlite3_column_int(stmt, 4);
+                int reminder_sent = sqlite3_column_int(stmt, 5);
+                string email = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
+
+                time_t reminder_time = calculateReminders(deadline, reminder);
+                if(now >= reminder_time) {
+                    sendExamReminder(email, name, deadline, difficultyToString(reminder), reminderToString(reminder), sessions.find(email) != sessions.end() ? sessions[email].username : "Student");
+
+                    // Mark reminder as sent
+                    sqlite3_stmt* updateStmt;
+                    const char* updateSql = "UPDATE subjects SET reminder_sent = 1 WHERE subject_id = ?;";
+                    if(sqlite3_prepare_v2(db, updateSql, -1, &updateStmt, nullptr) == SQLITE_OK) {
+                        sqlite3_bind_int(updateStmt, 1, subject_id);
+                        sqlite3_step(updateStmt);
+                        sqlite3_finalize(updateStmt);
+                    }
+                }
+            }
+
+            sqlite3_finalize(stmt);
+        } catch(const std::exception& e) {
+            cerr << "[Reminder] Exception: " << e.what() << endl;
+        }
+
+        sleep_hour:
+        // Sleep for 1 hour
+        std::this_thread::sleep_for(std::chrono::hours(1));
+    }
+}
+
+
 int main(){
 
     int rc = sqlite3_open(DB_PATH.c_str(), &db_focus_forge);
@@ -302,6 +444,11 @@ int main(){
     }
 
     initializeDatabase(db_focus_forge);
+
+    loadEnv();
+
+    // Start reminder background thread
+    std::thread(reminderLoop, db_focus_forge).detach();
 
     crow::SimpleApp app;
 
@@ -404,6 +551,7 @@ int main(){
             obj["subject"] = s.name;
             obj["difficulty"] = difficultyToString(s.difficulty);
             obj["deadline"] = s.deadline;
+            obj["reminder"] = reminderToString(s.reminder);
             obj["completed"] = s.completed;
             obj["grade"] = s.grade;
 
@@ -430,6 +578,7 @@ int main(){
         s.name = body["subject"].s();
         s.difficulty = difficultyToInt(body["difficulty"].s());
         s.deadline = body["deadline"].s();
+        s.reminder = reminderToInt(body["reminder"].s());
         if (body.has("grade")) {
             std::string grade = body["grade"].s();
             s.completed = grade.empty() ? 0 : 1;
@@ -461,6 +610,7 @@ int main(){
         s.name = body["subject"].s();
         s.difficulty = difficultyToInt(body["difficulty"].s());
         s.deadline = body["deadline"].s();
+        s.reminder = reminderToInt(body["reminder"].s());
         if (body.has("grade")) {
            std::string grade = body["grade"].s();
            s.completed = grade.empty() ? 0 : 1;
@@ -574,6 +724,7 @@ int main(){
 });
 
 
+
     // --- RUN SERVER --- 
     int port = 5001;
     if(const char* env_p = getenv("PORT")){
@@ -593,7 +744,10 @@ int main(){
 -I Crow/include \
 -I /opt/homebrew/include \
 -I /opt/homebrew/opt/openssl@3/include \
+-L /opt/homebrew/Cellar/cpr/1.14.2/lib \
 -L /opt/homebrew/opt/openssl@3/lib \
--lsqlite3 -lssl -lcrypto -lpthread
+-lcpr -lcurl -lssl -lcrypto -lsqlite3 -lpthread \
+-Wl,-rpath,/opt/homebrew/Cellar/cpr/1.14.2/lib
+
 ./focusforge
 */

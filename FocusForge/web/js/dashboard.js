@@ -5,8 +5,6 @@ let exams = [];
 let editingExamId = null;
 let authToken = null;
 
-// Load menu bar from backend
-
 // Initialize dashboard
 document.addEventListener('DOMContentLoaded', () => {
     // Check authentication
@@ -63,6 +61,7 @@ async function loadExams() {
             subjectName: s.subject,
             date: s.deadline,
             difficulty: s.difficulty.toLowerCase(),
+            reminder: s.reminder || 'none',
             completed: s.grade && s.grade !== '' && s.grade !== 'N/A', // Consider completed if grade exists
             grade: s.grade && s.grade !== 'N/A' ? s.grade : undefined
         }));
@@ -87,6 +86,7 @@ async function saveExam(examData) {
                 subject: examData.subjectName,
                 deadline: examData.date,
                 difficulty: examData.difficulty,
+                reminder: examData.reminder || 'none',
                 grade: examData.grade || ''
             })
         });
@@ -210,6 +210,7 @@ function openDialog(examId = null) {
             document.getElementById('subject').value = exam.subjectName;
             document.getElementById('deadline').value = exam.date;
             document.getElementById('difficulty').value = exam.difficulty;
+            document.getElementById('reminder').value = exam.reminder || 'none';
             document.getElementById('completed').checked = exam.completed;
             document.getElementById('grade').value = exam.grade || '';
             gradeGroup.style.display = exam.completed ? 'block' : 'none';
@@ -245,6 +246,7 @@ async function handleFormSubmit(e) {
         subjectName: document.getElementById('subject').value,
         date: document.getElementById('deadline').value,
         difficulty: document.getElementById('difficulty').value,
+        reminder: document.getElementById('reminder').value,
         completed: document.getElementById('completed').checked,
         grade: document.getElementById('grade').value || undefined
     };
