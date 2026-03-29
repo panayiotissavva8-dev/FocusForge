@@ -117,6 +117,7 @@ async function updateExam(examId, examData) {
                 subject: examData.subjectName,
                 deadline: examData.date,
                 difficulty: examData.difficulty,
+                reminder : examData.reminder,
                 grade: examData.grade || ''
             })
         });
@@ -163,10 +164,16 @@ function generateId() {
 
 // Format date
 function formatDate(dateString) {
+    if (!dateString || dateString === "none") return "No date";
+
     const date = new Date(dateString);
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    console.log("RAW DATE:", dateString);
+    if (isNaN(date)) return "Invalid date";
+
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 }
+
 
 // Check if exam is overdue
 function isOverdue(dateString, completed) {

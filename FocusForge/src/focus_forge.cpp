@@ -111,8 +111,11 @@ time_t calculateReminders(const string& deadline, const int reminder) {
 }
 
 void loadEnv() {
-    std::ifstream file(".env");
+    std::ifstream file("secret.env");
     std::string line;
+    if(!file.is_open()){
+        cerr<<"Failed to open API file"<<endl;
+    }
     while (getline(file, line)) {
         auto pos = line.find('=');
         if (pos != std::string::npos) {
@@ -189,12 +192,12 @@ void loadSubjects(sqlite3* db, vector<SubjectData>& subjects, const int user_id)
         s.user_id = sqlite3_column_int(stmt, 1);
         s.name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
         s.difficulty = sqlite3_column_int(stmt, 3);
-        s.reminder_sent = sqlite3_column_int(stmt, 4);
-
-        const char* deadline = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
+        const char* deadline = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
         s.deadline = deadline ? deadline : "";
 
-        s.reminder = sqlite3_column_int(stmt, 6);
+        s.reminder = sqlite3_column_int(stmt, 5);
+        s.reminder_sent = sqlite3_column_int(stmt, 6);
+        
         
         s.completed = sqlite3_column_int(stmt, 7);
         
@@ -345,12 +348,16 @@ void insertUser(sqlite3* db, const UserData& u){
 }
 
 
-const char* key = getenv("SENDGRID_API_KEY");
-std::string SENDGRID_API_KEY = key ? key : "";
-const std::string FROM_EMAIL = "focusforgereminder@gmail.com";
+
+
 
 void sendExamReminder(const std::string& userEmail, const std::string& examName,  const std::string& examDate, const std::string& examDifficulty, const std::string& examReminder, const string username) 
 {
+
+    const char* key = getenv("SENDGRID_API_KEY");
+    std::string SENDGRID_API_KEY = key ? key : "";
+    const std::string FROM_EMAIL = "focusforgereminder@gmail.com";
+    
     nlohmann::json body = {
         {"personalizations", {{
             {"to", {{{"email", userEmail}}}},
@@ -387,7 +394,7 @@ void reminderLoop(sqlite3* db) {
             
             // Load all subjects for all users
             sqlite3_stmt* stmt;
-            const char* sql = "SELECT s.subject_id, s.user_id, s.name, s.deadline, s.reminder, s.reminder_sent, u.email "
+            const char* sql = "SELECT s.subject_id, s.user_id, s.name, s.deadline, s.reminder, s.reminder_sent, s.difficulty, u.email "
                               "FROM subjects s "
                               "JOIN users u ON s.user_id = u.user_id "
                               "WHERE s.reminder_sent = 0;";
@@ -405,11 +412,12 @@ void reminderLoop(sqlite3* db) {
                 string deadline = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
                 int reminder = sqlite3_column_int(stmt, 4);
                 int reminder_sent = sqlite3_column_int(stmt, 5);
-                string email = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
+                int difficulty = sqlite3_column_int(stmt, 6);
+                string email = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
 
                 time_t reminder_time = calculateReminders(deadline, reminder);
                 if(now >= reminder_time) {
-                    sendExamReminder(email, name, deadline, difficultyToString(reminder), reminderToString(reminder), sessions.find(email) != sessions.end() ? sessions[email].username : "Student");
+                    sendExamReminder(email, name, deadline, difficultyToString(difficulty), reminderToString(reminder), sessions.find(email) != sessions.end() ? sessions[email].username : "Student");
 
                     // Mark reminder as sent
                     sqlite3_stmt* updateStmt;
@@ -436,6 +444,9 @@ void reminderLoop(sqlite3* db) {
 
 int main(){
 
+    loadEnv();
+    
+
     int rc = sqlite3_open(DB_PATH.c_str(), &db_focus_forge);
 
     if(rc){
@@ -445,12 +456,15 @@ int main(){
 
     initializeDatabase(db_focus_forge);
 
-    loadEnv();
+    
+
 
     // Start reminder background thread
     std::thread(reminderLoop, db_focus_forge).detach();
 
     crow::SimpleApp app;
+
+    
 
     CROW_ROUTE(app, "/")([](){
         ifstream file("web/html/login.html");
