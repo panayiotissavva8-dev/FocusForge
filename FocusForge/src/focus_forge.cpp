@@ -27,6 +27,7 @@ struct UserData {
     string email;
     int termsAccepted;
     long long terms_accepted_at;
+    int failed_count;
 };
 
 struct SubjectData {
@@ -124,6 +125,30 @@ void loadEnv() {
             setenv(key.c_str(), value.c_str(), 1);
         }
     }
+}
+
+// Check for invalid characters in user input
+bool containsInvalidChars(const std::string& str) {
+    const std::string invalid = "'\";";
+    return str.find_first_of(invalid) != std::string::npos;
+}
+
+// Check length
+bool isLengthValid(const std::string& str, size_t minLen, size_t maxLen) {
+    return str.length() >= minLen && str.length() <= maxLen;
+}
+
+// Validate user input fields
+std::string validateField(const std::string& field, const std::string& fieldName, size_t minLen, size_t maxLen, bool checkEmail = false) {
+    if(field.empty()) return fieldName + " is required";
+    if(!isLengthValid(field, minLen, maxLen)) return fieldName + " must be between " + std::to_string(minLen) + " and " + std::to_string(maxLen) + " characters";
+    if(containsInvalidChars(field)) return fieldName + " cannot contain ' \" ; characters";
+    
+    if(checkEmail) {
+        if(field.find('@') == std::string::npos || field.find('.') == std::string::npos) return "Invalid email format";
+    }
+
+    return ""; // valid
 }
 
 // --- DATABASE FUNCTIONS ---
@@ -442,6 +467,8 @@ void reminderLoop(sqlite3* db) {
 }
 
 
+
+
 int main(){
 
     loadEnv();
@@ -481,6 +508,7 @@ int main(){
 
         string username = body["username"].s();
         string password = body["password"].s();
+        int failed_count = body.has("failed_count") ? body["failed_count"].i() : 0;
         string input_hash = hashPassword(password);
 
         vector<UserData> users;
@@ -489,6 +517,18 @@ int main(){
         if(users.empty()){
             return crow::response(404, "User not found");
         }
+
+        if(failed_count >=5){
+            return crow::response(403, "Too many failed attempts. Please try again later.");
+        }
+
+        cout<<"Failed count:"<<failed_count<<endl;
+
+       // user input validation with helper function (line 130)
+        std::string err;
+        if(!(err = validateField(username, "Username", 6, 14)).empty()) return crow::response(400, err);
+        if(!(err = validateField(password, "Password", 6, 20)).empty()) return crow::response(400, err);
+
         UserData u = users[0];
         if(u.password_hash == input_hash){
             string token = username + "-" + to_string(chrono::system_clock::now().time_since_epoch().count());
@@ -499,6 +539,7 @@ int main(){
             res["username"] = username;
             res["user_id"] = u.user_id;
             res["token"] = token;
+            res["failed_count"] = failed_count;
 
             return crow::response(res);
         }else{
@@ -517,16 +558,23 @@ int main(){
         string confirm_password = body["confirm_password"].s();
         string email = body["email"].s();
         bool termsAccepted = body["termsAccepted"].b();
-        string hashed = hashPassword(password);
-        time_t terms_accepted_at = time(nullptr);
 
-        if(password != confirm_password){
-            return crow::response(400, "Passwords do not match");
-        }
+        // Terms acceptence validation
 
         if(!termsAccepted){
             return crow::response(400, "Terms must be accepted");
         }
+
+        // user input validation with helper function (line 130)
+        std::string err;
+        if(!(err = validateField(username, "Username", 6, 14)).empty()) return crow::response(400, err);
+        if(!(err = validateField(password, "Password", 6, 20)).empty()) return crow::response(400, err);
+        if(password != confirm_password) return crow::response(400, "Passwords do not match");
+        if(!(err = validateField(email, "Email", 0, 40, true)).empty()) return crow::response(400, err);
+
+
+        string hashed = hashPassword(password);
+        time_t terms_accepted_at = time(nullptr);
 
         UserData u;
         u.owner = username;
@@ -762,6 +810,5 @@ int main(){
 -L /opt/homebrew/opt/openssl@3/lib \
 -lcpr -lcurl -lssl -lcrypto -lsqlite3 -lpthread \
 -Wl,-rpath,/opt/homebrew/Cellar/cpr/1.14.2/lib
-
 ./focusforge
 */
