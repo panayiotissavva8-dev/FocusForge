@@ -14,23 +14,33 @@
     <div class="menubar">
         <div class="container">
             <div class="menubar-content">
+                <div class="menubar-actions">
+                    <button class="btn btn-primary" onclick="openDialog()">
+                        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add Exam
+                    </button>
+
+                    <button class="btn btn-outline" onclick="openSettings()">
+                        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em; height:1em; vertical-align:middle;">
+                            <path d="M12.22 2a10 10 0 0 0-1.22 0l-.54 2.7a8.53 8.53 0 0 0-2.42 1l-2.5-1.16a10 10 0 0 0-1.72 1.72l1.16 2.5a8.53 8.53 0 0 0-1 2.42l-2.7.54a10 10 0 0 0 0 2.44l2.7.54a8.53 8.53 0 0 0 1 2.42l-1.16 2.5a10 10 0 0 0 1.72 1.72l2.5-1.16a8.53 8.53 0 0 0 2.42 1l.54 2.7a10 10 0 0 0 2.44 0l.54-2.7a8.53 8.53 0 0 0 2.42-1l2.5 1.16a10 10 0 0 0 1.72-1.72l-1.16-2.5a8.53 8.53 0 0 0 1-2.42l2.7-.54a10 10 0 0 0 0-2.44l-2.7-.54a8.53 8.53 0 0 0-1-2.42l1.16-2.5a10 10 0 0 0-1.72-1.72l-2.5 1.16a8.53 8.53 0 0 0-2.42-1L12.22 2z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        Settings
+                    </button>
+                </div>
                 <div class="brand">
                     <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
                         <path d="M6 12v5c3 3 9 3 12 0v-5"/>
                     </svg>
-                    <div>
+                    <div class ="header-text">
                         <h1>FocusForge</h1>
                         <p class="subtitle">Manage your upcoming exams</p>
                     </div>
                 </div>
-                <button class="btn btn-primary" onclick="openDialog()">
-                    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    Add Exam
-                </button>
             </div>
         </div>
     </div>
@@ -129,7 +139,7 @@
                     <label for="completed">Mark as completed</label>
                 </div>
                 <div id="grade-group" class="form-group" style="display: none;">
-                    <label for="grade">Grade (optional)</label>
+                    <label for="grade">Grade</label>
                     <input type="text" id="grade" class="input" placeholder="e.g., A+, 95%, etc.">
                 </div>
             </form>
@@ -139,6 +149,50 @@
             </div>
         </div>
     </div>
+
+    <!-- Settings Dialog -->
+      <div id="settings-dialog" class="dialog-overlay">
+        <div class="dialog-content">
+            <div class="dialog-header">
+                <div class="header-text">
+                    <h2>Settings</h2>
+                    <p>Customize your FocusForge experience.</p>
+                </div>
+                <button type="button" class="btn btn-outline" onclick="closeSettings()">Close</button>
+            </div>
+            <div class="dialog-body">
+                <div class="form-group">
+                    <label for="theme-select">Theme</label>
+                    <select id="theme-select" class="select" onchange="changeTheme(this.value)">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                    </select>
+                </div>
+                </div>
+                <div class="form-group">
+                    <label for="language-select">Language</label>
+                    <select id="language-select" class="select" onchange="changeLanguage(this.value)">
+                        <option value="en">English</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                <button class="btn btn-outline" id="logoutBtn" onclick="window.location.href='/login'">
+                    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    Sign Out
+                </button>
+                </div>
+            </div>
+           
+        </div>
+    
+
+    
 
     <script src="/web/js/dashboard.js"></script>
 </body>

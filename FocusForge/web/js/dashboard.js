@@ -39,6 +39,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
+// Apply saved theme on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.classList.toggle('dark-theme', savedTheme === 'dark');
+
+    const themeSelect = document.getElementById('theme-select');
+    if (themeSelect) themeSelect.value = savedTheme;
+});
+
+
 // Load exams from backend API
 async function loadExams() {
     try {
@@ -248,6 +258,23 @@ function closeDialog() {
     const dialog = document.getElementById('exam-dialog');
     dialog.classList.remove('active');
     editingExamId = null;
+}
+
+function openSettings() {
+    document.getElementById('settings-dialog').classList.add('active');
+    
+}
+
+function closeSettings() {
+    const dialog = document.getElementById("settings-dialog");
+    dialog.classList.remove("active");
+}
+
+function changeTheme(value) {
+    document.body.classList.toggle('dark-theme', value === 'dark');
+    localStorage.setItem('theme', value);
+    
+
 }
 
 // Handle form submit
