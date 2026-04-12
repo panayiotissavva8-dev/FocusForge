@@ -5,8 +5,11 @@ let exams = [];
 let editingExamId = null;
 let authToken = null;
 
+let translations = {};
+let currentLang = 'en';
+
 // Initialize dashboard
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Check authentication
     authToken = localStorage.getItem("sessionToken");
     
@@ -16,6 +19,18 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = "/login";
         return;
     }
+
+     const user = result.user;
+    const token = await user.getIdToken();
+
+    fetch("/auth/firebase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token })
+});
+
+    const savedLang = localStorage.getItem("language") || "en";
+    await loadLanguage(savedLang);
     
     // Load exams from backend
     loadExams();
@@ -47,6 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeSelect = document.getElementById('theme-select');
     if (themeSelect) themeSelect.value = savedTheme;
 });
+
+
 
 
 // Load exams from backend API
@@ -103,6 +120,17 @@ async function saveExam(examData) {
             })
         });
 
+        if(res.ok) {
+        Swal.fire({
+            theme: "auto",
+         position: "center",
+         icon: "success",
+         title:translations.alert['add-success'],
+         howConfirmButton: false,
+         timer: 1700
+        });
+    }
+
         if (!res.ok) {
             throw new Error(`Failed to save exam: ${res.status} ${res.statusText}`);
         }
@@ -134,6 +162,16 @@ async function updateExam(examId, examData) {
             })
         });
 
+        if(res.ok) {
+             Swal.fire({
+         position: "center",
+         icon: "success",
+         title: translations.alert['update-success'],
+         howConfirmButton: false,
+         timer: 1550
+        });
+        }
+
         if (!res.ok) {
             throw new Error(`Failed to update exam: ${res.status} ${res.statusText}`);
         }
@@ -146,6 +184,7 @@ async function updateExam(examId, examData) {
         throw err;
     }
 }
+
 
 // Delete exam from backend
 async function deleteExamFromBackend(examId) {
@@ -236,17 +275,17 @@ function openDialog(examId = null) {
             document.getElementById('grade').value = exam.grade || '';
             gradeGroup.style.display = exam.completed ? 'block' : 'none';
             
-            title.textContent = 'Edit Exam';
-            description.textContent = 'Update your exam details below.';
-            submitBtn.textContent = 'Update Exam';
+            title.textContent = translations["edit-exam"] || 'Edit Exam';
+            description.textContent = translations["edit-exam-sub-text"] || 'Update your exam details below.';
+            submitBtn.textContent = translations["update-exam-button"] || 'Update Exam';
         }
     } else {
         // Add mode
         form.reset();
         gradeGroup.style.display = 'none';
-        title.textContent = 'Add New Exam';
-        description.textContent = 'Enter the details of your upcoming exam.';
-        submitBtn.textContent = 'Add Exam';
+        title.textContent = translations["add-new-exam"] || 'Add New Exam';
+        description.textContent = translations["add-new-exam-sub-text"] || 'Enter the details of your upcoming exam.';
+        submitBtn.textContent = translations["add-exam-button"] || 'Add Exam';
     }
     
     dialog.classList.add('active');
@@ -276,6 +315,40 @@ function changeTheme(value) {
     
 
 }
+
+function changeLanguage(lang) {
+    localStorage.setItem("language", lang);
+    loadLanguage(lang);
+}
+
+async function loadLanguage(lang) {
+    const res = await fetch(`/lang/${lang}.json`);
+    translations = await res.json();
+    currentLang = lang;
+
+    localStorage.setItem("language", lang);
+
+    applyTranslations();
+}
+
+function applyTranslations() {
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (translations[key]) {
+            el.textContent = translations[key];
+        }
+    });
+
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+        const key = el.getAttribute("data-i18n-placeholder");
+        if (translations[key]) {
+            el.placeholder = translations[key];
+        }
+    });
+
+    renderExams(); // Re-render exams to update any translated text
+}
+
 
 // Handle form submit
 async function handleFormSubmit(e) {
@@ -308,9 +381,42 @@ async function handleFormSubmit(e) {
 
 // Delete exam
 async function deleteExam(id) {
-    if (confirm('Are you sure you want to delete this exam?')) {
-        await deleteExamFromBackend(id);
-    }
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger"
+    },
+    
+  });
+
+  const result = await swalWithBootstrapButtons.fire({
+    title: translations.alert['delete-confirmation'],
+    text: translations.alert['delete-warning'],
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: translations.alert['delete-yes'],
+    cancelButtonText: translations.alert['delete-no'],
+    reverseButtons: true,
+    confirmButtonColor: '#2563eb',
+    cancelButtonColor: '#dc2626'
+  });
+
+  if (result.isConfirmed) {
+    await deleteExamFromBackend(id);
+
+    await swalWithBootstrapButtons.fire({
+      title: translations.alert['delete-title'],
+      text: translations.alert['delete-success'],
+      icon: "success"
+    });
+
+  } else if (result.dismiss === Swal.DismissReason.cancel) {
+    await swalWithBootstrapButtons.fire({
+      title: translations.alert['cancel-title'],
+      text: translations.alert['delete-cancel'],
+      icon: "error"
+    });
+  }
 }
 
 // Mark as completed
@@ -323,10 +429,10 @@ function markAsCompleted(id) {
 // Create exam card HTML
 function createExamCard(exam) {
     const difficultyLabels = {
-        none: 'None',
-        low: 'Low',
-        medium: 'Medium',
-        high: 'High'
+        none: translations['difficulty-none'] || 'None',
+        low: translations['difficulty-low'] || 'Low',
+        medium: translations['difficulty-medium'] || 'Medium',
+        high: translations['difficulty-high'] || 'High'
     };
     
     const overdue = isOverdue(exam.date, exam.completed);
@@ -371,7 +477,7 @@ function createExamCard(exam) {
                                 <line x1="12" y1="8" x2="12" y2="12"></line>
                                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
                             </svg>
-                            Overdue
+                            <span>${translations["overdue"] || 'Overdue'}</span>
                         </span>
                     ` : ''}
                     ${exam.completed ? `
@@ -380,13 +486,13 @@ function createExamCard(exam) {
                                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                                 <polyline points="22 4 12 14.01 9 11.01"/>
                             </svg>
-                            Completed
+                            <span>${translations["completed"] || 'Completed'}</span>
                         </span>
                     ` : ''}
                 </div>
                 ${exam.grade ? `
                     <div class="grade-display">
-                        <p>Grade</p>
+                        <p>${translations["grade"] || 'Grade'}</p>
                         <p>${exam.grade}</p>
                     </div>
                 ` : ''}
@@ -396,7 +502,7 @@ function createExamCard(exam) {
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                             <polyline points="22 4 12 14.01 9 11.01"/>
                         </svg>
-                        Mark as Completed
+                        <span>${translations["mark-as-completed"] || 'Mark as Completed'}</span>
                     </button>
                 ` : ''}
             </div>
@@ -428,8 +534,8 @@ function renderExams() {
                     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
                     <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
                 </svg>
-                <h3>No upcoming exams</h3>
-                <p>Add your first exam to get started tracking your studies</p>
+               <h3>${translations["no-upcoming-exams"]}</h3>
+               <p>${translations["no-upcoming-sub-text"]}</p>
             </div>
         `;
     } else {
@@ -445,8 +551,8 @@ function renderExams() {
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                     <polyline points="22 4 12 14.01 9 11.01"/>
                 </svg>
-                <h3>No completed exams</h3>
-                <p>Mark exams as completed to see them here</p>
+                <h3>${translations["no-completed-exams"]}</h3>
+                <p>${translations["no-completed-sub-text"]}</p>
             </div>
         `;
     } else {

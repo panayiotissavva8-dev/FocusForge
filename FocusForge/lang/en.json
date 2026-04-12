@@ -1,0 +1,72 @@
+{
+    "add-exam-button": "Add Exam",
+    "update-exam-button": "Update Exam",
+    "settings-button": "Settings",
+    "title-sub-text": "Manage your upcoming exams",
+    "upcoming-exams": "Upcoming",
+    "completed-exams": "Completed",
+    "no-upcoming-exams": "No upcoming exams",
+    "no-upcoming-sub-text": "Add your first exam to get started tracking your studies",
+    "no-completed-exams": "No completed exams",
+    "no-completed-sub-text": "Mark exams as completed to see them here",
+
+    "add-new-exam": "Add New Exam",
+    "add-new-exam-sub-text": "Enter the details of your upcoming exam.",
+    "exam-date": "Exam Date",
+    "exam-name": "Subject Name",
+    "exam-name-placeholder": "e.g. Mathematics",
+    
+    "difficulty": "Difficulty Level",
+    "difficulty-none": "None",
+    "difficulty-low": "Low",
+    "difficulty-medium": "Medium",
+    "difficulty-high": "High",
+
+    "overdue": "Overdue",
+    "completed": "Completed",
+
+    "reminder": "Reminder",
+    "reminder-none": "None",
+    "reminder-1day": "1 day before",
+    "reminder-3days": "3 days before",
+    "reminder-1week": "1 week before",
+    "mark-as-completed": "Mark as Completed",
+    "grade": "Grade",
+    "exam-grade-placeholder": "e.g. A+",
+    "exam-cancel": "Cancel",
+
+    "settings-title": "Settings",
+    "settings-sub-text": "Customize your FocusForge experience.",
+
+    "theme": "Theme",
+    "theme-light": "Light",
+    "theme-dark": "Dark",
+
+    "language": "Language",
+    "language-english": "English",
+    "language-spanish": "Spanish",
+    "language-french": "French",
+    "language-greek": "Greek",
+
+    "settings-close": "Close",
+
+    "sign-out": "Sign Out",
+    
+    "alert": {
+        "cancel-title": "Cancelled!",
+        "delete-title": "Deleted!",
+        "delete-confirmation": "Are you sure you want to delete this exam?",
+        "delete-success": "Exam deleted successfully.",
+        "delete-warning": "You won't be able to revert this!",
+        "delete-yes": "Yes, delete it",
+        "delete-no": "No, cancel",
+        "delete-cancel": "Deletion cancelled",
+
+        "delete-error": "An error occurred while deleting the exam. Please try again.",
+        "update-success": "Exam updated successfully.",
+        "update-error": "An error occurred while updating the exam. Please try again.",
+        "add-success": "Exam added successfully.",
+        "add-error": "An error occurred while adding the exam. Please try again."
+    }
+
+}

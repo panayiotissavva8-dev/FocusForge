@@ -589,6 +589,36 @@ int main(){
         return crow::response(200, "Register Successfully");
     });
 
+// TODO 
+    // --- FIREBASE AUTH --- 
+    CROW_ROUTE(app, "/auth/firebase").methods("POST"_method)
+([](const crow::request& req){
+    auto body = crow::json::load(req.body);
+
+    if (!body) {
+        return crow::response(400, "Invalid JSON");
+    }
+
+    std::string token = body["token"].s();
+
+    // STEP 1: verify token
+    bool valid = verifyFirebaseToken(token);
+
+    if (!valid) {
+        return crow::response(401, "Invalid token");
+    }
+
+    // STEP 2: extract user info (uid/email)
+    auto user = decodeFirebaseToken(token);
+
+    crow::json::wvalue res;
+    res["uid"] = user.uid;
+    res["email"] = user.email;
+
+    return crow::response(res);
+});
+
+
 
     // --- GET ALL SUBJECTS API ---
     CROW_ROUTE(app, "/dashboard_api").methods(crow::HTTPMethod::GET)([](const crow::request& req){
@@ -752,6 +782,23 @@ int main(){
         return res;
     });
 
+    CROW_ROUTE(app, "/lang/<string>")
+([](const crow::request&, std::string file){
+    std::ifstream in("lang/" + file);
+
+    if (!in.is_open()) {
+        return crow::response(404, "Language file not found");
+    }
+
+    std::stringstream buffer;
+    buffer << in.rdbuf();
+
+    crow::response res;
+    res.set_header("Content-Type", "application/json");
+    res.write(buffer.str());
+    return res;
+});
+
 
     // --- STATIC FILES ---
     app.route_dynamic("/web/<path>")([](const crow::request& req, std::string path){
@@ -802,7 +849,8 @@ int main(){
 }
 
 // --- COMPILE COMMAND ---
-/* g++ -std=c++17 src/focus_forge.cpp -o focusforge \
+/*
+ g++ -std=c++17 src/focus_forge.cpp -o focusforge \
 -I Crow/include \
 -I /opt/homebrew/include \
 -I /opt/homebrew/opt/openssl@3/include \
@@ -811,4 +859,5 @@ int main(){
 -lcpr -lcurl -lssl -lcrypto -lsqlite3 -lpthread \
 -Wl,-rpath,/opt/homebrew/Cellar/cpr/1.14.2/lib
 ./focusforge
+
 */

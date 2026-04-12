@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FocusForge - Dashboard</title>
     <link rel="stylesheet" href="/web/css/dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <!-- Menu Bar Container (loaded from backend) -->
@@ -20,7 +21,7 @@
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
-                        Add Exam
+                       <span data-i18n="add-exam-button"></span>
                     </button>
 
                     <button class="btn btn-outline" onclick="openSettings()">
@@ -28,7 +29,7 @@
                             <path d="M12.22 2a10 10 0 0 0-1.22 0l-.54 2.7a8.53 8.53 0 0 0-2.42 1l-2.5-1.16a10 10 0 0 0-1.72 1.72l1.16 2.5a8.53 8.53 0 0 0-1 2.42l-2.7.54a10 10 0 0 0 0 2.44l2.7.54a8.53 8.53 0 0 0 1 2.42l-1.16 2.5a10 10 0 0 0 1.72 1.72l2.5-1.16a8.53 8.53 0 0 0 2.42 1l.54 2.7a10 10 0 0 0 2.44 0l.54-2.7a8.53 8.53 0 0 0 2.42-1l2.5 1.16a10 10 0 0 0 1.72-1.72l-1.16-2.5a8.53 8.53 0 0 0 1-2.42l2.7-.54a10 10 0 0 0 0-2.44l-2.7-.54a8.53 8.53 0 0 0-1-2.42l1.16-2.5a10 10 0 0 0-1.72-1.72l-2.5 1.16a8.53 8.53 0 0 0-2.42-1L12.22 2z"></path>
                             <circle cx="12" cy="12" r="3"></circle>
                         </svg>
-                        Settings
+                       <span data-i18n="settings-button"></span>
                     </button>
                 </div>
                 <div class="brand">
@@ -38,7 +39,7 @@
                     </svg>
                     <div class ="header-text">
                         <h1>FocusForge</h1>
-                        <p class="subtitle">Manage your upcoming exams</p>
+                        <p class="subtitle" data-i18n="title-sub-text"></p>
                     </div>
                 </div>
             </div>
@@ -56,14 +57,16 @@
                             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
                             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
                         </svg>
-                        Upcoming (<span id="upcoming-count">0</span>)
+                        <span data-i18n="upcoming-exams"></span>
+                        (<span id="upcoming-count">0</span>)
                     </button>
                     <button class="tab-trigger" onclick="switchTab('completed')">
                         <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                             <polyline points="22 4 12 14.01 9 11.01"/>
                         </svg>
-                        Completed (<span id="completed-count">0</span>)
+                        <span data-i18n="completed-exams"></span>
+                        (<span id="completed-count">0</span>)
                     </button>
                 </div>
 
@@ -76,8 +79,8 @@
                                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
                                 <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
                             </svg>
-                            <h3>No upcoming exams</h3>
-                            <p>Add your first exam to get started tracking your studies</p>
+                            <h3 data-i18n="no-upcoming-exams"></h3>
+                            <p data-i18n="no-upcoming-sub-text"></p>
                         </div>
                     </div>
                 </div>
@@ -91,8 +94,8 @@
                                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                                 <polyline points="22 4 12 14.01 9 11.01"/>
                             </svg>
-                            <h3>No completed exams</h3>
-                            <p>Mark exams as completed to see them here</p>
+                            <h3 data-i18n="no-completed-exams"></h3>
+                            <p data-i18n="no-completed-sub-text"></p>
                         </div>
                     </div>
                 </div>
@@ -104,48 +107,48 @@
     <div id="exam-dialog" class="dialog-overlay">
         <div class="dialog-content">
             <div class="dialog-header">
-                <h2 id="dialog-title">Add New Exam</h2>
-                <p id="dialog-description">Enter the details of your upcoming exam.</p>
+                <h2 id="dialog-title" data-i18n="add-new-exam"></h2>
+                <p id="dialog-description" data-i18n="add-new-exam-sub-text"></p>
             </div>
             <form id="exam-form" class="dialog-body">
                 <div class="form-group">
-                    <label for="subject">Subject Name</label>
-                    <input type="text" id="subject" class="input" placeholder="e.g., Mathematics" required>
+                    <label for="subject" data-i18n="exam-name"></label>
+                    <input type="text" id="subject" class="input" data-i18n-placeholder="exam-name-placeholder" required>
                 </div>
                 <div class="form-group">
-                    <label for="deadline">Exam Date</label>
+                    <label for="deadline" data-i18n="exam-date"></label>
                     <input type="date" id="deadline" class="input" required>
                 </div>
                 <div class="form-group">
-                    <label for="difficulty">Difficulty Level</label>
+                    <label for="difficulty" data-i18n="difficulty"></label>
                     <select id="difficulty" class="select">
-                        <option value="none">None</option>
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
+                        <option value="none" data-i18n="difficulty-none"></option>
+                        <option value="low" data-i18n="difficulty-low"></option>
+                        <option value="medium" data-i18n="difficulty-medium"></option>
+                        <option value="high" data-i18n="difficulty-high"></option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="reminder">Reminder</label>
+                    <label for="reminder" data-i18n="reminder"></label>
                     <select id="reminder" class="select">
-                        <option value="none">None</option>
-                        <option value="1_day">1 day before</option>
-                        <option value="3_days">3 days before</option>
-                        <option value="1_week">1 week before</option>
+                        <option value="none" data-i18n="reminder-none"></option>
+                        <option value="1_day" data-i18n="reminder-1day"></option>
+                        <option value="3_days" data-i18n="reminder-3days"></option>
+                        <option value="1_week" data-i18n="reminder-1week"></option>
                     </select>
                 </div>
                 <div class="form-group checkbox-group">
                     <input type="checkbox" id="completed" class="checkbox">
-                    <label for="completed">Mark as completed</label>
+                    <label for="completed" data-i18n="mark-as-completed"></label>
                 </div>
                 <div id="grade-group" class="form-group" style="display: none;">
-                    <label for="grade">Grade</label>
-                    <input type="text" id="grade" class="input" placeholder="e.g., A+, 95%, etc.">
+                    <label for="grade" data-i18n="grade"></label>
+                    <input type="text" id="grade" class="input" data-i18n-placeholder="exam-grade-placeholder">
                 </div>
             </form>
             <div class="dialog-footer">
-                <button type="button" class="btn btn-outline" onclick="closeDialog()">Cancel</button>
-                <button type="submit" form="exam-form" class="btn btn-primary" id="submit-btn">Add Exam</button>
+                <button type="button" class="btn btn-outline" onclick="closeDialog()" data-i18n="exam-cancel"></button>
+                <button type="submit" form="exam-form" class="btn btn-primary" id="submit-btn" data-i18n="add-exam-button"></button>
             </div>
         </div>
     </div>
@@ -155,26 +158,26 @@
         <div class="dialog-content">
             <div class="dialog-header">
                 <div class="header-text">
-                    <h2>Settings</h2>
-                    <p>Customize your FocusForge experience.</p>
+                    <h2 data-i18n="settings-title"></h2>
+                    <p data-i18n="settings-sub-text"></p>
                 </div>
-                <button type="button" class="btn btn-outline" onclick="closeSettings()">Close</button>
+                <button type="button" class="btn btn-outline" onclick="closeSettings()" data-i18n="settings-close"></button>
             </div>
             <div class="dialog-body">
                 <div class="form-group">
-                    <label for="theme-select">Theme</label>
+                    <label for="theme-select" data-i18n="theme"></label>
                     <select id="theme-select" class="select" onchange="changeTheme(this.value)">
-                        <option value="light">Light</option>
-                        <option value="dark">Dark</option>
+                        <option value="light" data-i18n="theme-light"></option>
+                        <option value="dark" data-i18n="theme-dark"></option>
                     </select>
                 </div>
-                </div>
                 <div class="form-group">
-                    <label for="language-select">Language</label>
+                    <label for="language-select" data-i18n="language"></label>
                     <select id="language-select" class="select" onchange="changeLanguage(this.value)">
-                        <option value="en">English</option>
-                        <option value="es">Spanish</option>
-                        <option value="fr">French</option>
+                        <option value="en" data-i18n="language-english"></option>
+                        <option value="es" data-i18n="language-spanish"></option>
+                        <option value="fr" data-i18n="language-french"></option>
+                        <option value="gr" data-i18n="language-greek"></option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -184,7 +187,7 @@
                         <polyline points="16 17 21 12 16 7"/>
                         <line x1="21" y1="12" x2="9" y2="12"/>
                     </svg>
-                    Sign Out
+                    <span data-i18n="sign-out"></span>
                 </button>
                 </div>
             </div>

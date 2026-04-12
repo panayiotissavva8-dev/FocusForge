@@ -1,3 +1,22 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  signInWithPopup 
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCJzcI7xT5ZPEMUbK5dWjAWYro5h0sGFbo",
+  authDomain: "focusforge-f2293.firebaseapp.com",
+  projectId: "focusforge-f2293",
+  appId: "1:7861425292:web:279f9d6ffea07780b217a9"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+
 document.addEventListener("DOMContentLoaded", () => {
     const signBtn = document.getElementById("sign");
     const registerBtn = document.getElementById("register");
@@ -90,4 +109,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Update countdown every second
     setInterval(updateLoginState, 1000);
+
+    document.getElementById("googleLogin").addEventListener("click", async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      console.log("Logged in:", user);
+    } catch (error) {
+      console.error(error);
+    }
+  });
+
+   
 });

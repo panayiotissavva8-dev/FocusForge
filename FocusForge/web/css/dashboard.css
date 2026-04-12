@@ -173,6 +173,11 @@ body.dark-theme .card-date svg {
 
 
 /* Preserve badge colors in dark mode */
+body.dark-theme .badge-none {
+    background-color: var(--color-success-light) !important;
+    color: var(--color-gray-800) !important;
+}
+
 body.dark-theme .badge-low,
 body.dark-theme .badge-completed {
     background-color: var(--color-success-light) !important;
@@ -256,6 +261,18 @@ body.dark-theme #settings-dialog .btn-outline:hover {
     border-color: #58a6ff;
 }
 
+.swal2-popup {
+  background: #1f2937 !important;
+  color: #f9fafb !important;
+}
+
+.swal2-confirm {
+  background-color: #2563eb !important;
+}
+
+.swal2-cancel {
+  background-color: #dc2626 !important;
+}
 
 
 /* Base Styles */

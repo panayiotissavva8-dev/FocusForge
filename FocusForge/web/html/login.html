@@ -6,6 +6,7 @@
         <title>FocusForge - Login</title>
         <link rel="stylesheet" href="/web/css/login.css">
         <link rel="stylesheet" href="/web/css/dashboard.css">
+        <link rel="stylesheet" href="https://googleapis.com">
         <script type="module" src="/web/js/login.js" defer></script>
     </head>
     <body class="auth-page">
@@ -21,6 +22,10 @@
 
             <button class="btn btn-primary btn-full" id="sign">Sign In</button>
             <button class="btn btn-outline btn-full" id="register">Register</button>
+            <button class="btn btn-outline btn-full google-btn" id="googleLogin" onclick="loginWithGoogle()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo">
+            </button></button>
+            
 
             <address>
                 Contact us: <a href="mailto:infoFocusForge@gmail.com">infoFocusForge@gmail.com</a>
@@ -29,5 +34,6 @@
                  &copy: 2026 Northstack Ltd. All rights reserved.
             </address>
         </div>
+
     </body>
 </html>

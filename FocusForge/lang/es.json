@@ -1,0 +1,71 @@
+{
+    "add-exam-button": "Agregar examen",
+    "update-exam-button": "Actualizar examen",
+    "settings-button": "Configuración",
+    "title-sub-text": "Gestiona tus próximos exámenes",
+    "upcoming-exams": "Próximos",
+    "completed-exams": "Completados",
+    "no-upcoming-exams": "No hay exámenes próximos",
+    "no-upcoming-sub-text": "Agrega tu primer examen para empezar a organizar tus estudios",
+    "no-completed-exams": "No hay exámenes completados",
+    "no-completed-sub-text": "Marca los exámenes como completados para verlos aquí",
+
+    "add-new-exam": "Agregar nuevo examen",
+    "add-new-exam-sub-text": "Introduce los detalles de tu próximo examen.",
+    "exam-date": "Fecha del examen",
+    "exam-name": "Nombre de la asignatura",
+    "exam-name-placeholder": "e.g. Matemáticas",
+    
+    "difficulty": "Nivel de dificultad",
+    "difficulty-none": "Ninguno",
+    "difficulty-low": "Bajo",
+    "difficulty-medium": "Medio",
+    "difficulty-high": "Alto",
+
+    "overdue": "Atrasado",
+    "completed": "Completado",
+
+    "reminder": "Recordatorio",
+    "reminder-none": "Ninguno",
+    "reminder-1day": "1 día antes",
+    "reminder-3days": "3 días antes",
+    "reminder-1week": "1 semana antes",
+    "mark-as-completed": "Marcar como completado",
+    "grade": "Calificación",
+    "exam-grade-placeholder": "e.g. A+",
+    "exam-cancel": "Cancelar",
+
+    "settings-title": "Configuración",
+    "settings-sub-text": "Personaliza tu experiencia en FocusForge.",
+
+    "theme": "Tema",
+    "theme-light": "Claro",
+    "theme-dark": "Oscuro",
+
+    "language": "Idioma",
+    "language-english": "Inglés",
+    "language-spanish": "Español",
+    "language-french": "Francés",
+    "language-greek": "griego",
+
+    "serttings-close": "Cerrar",
+
+    "sign-out": "Cerrar sesión",
+
+    "alert": {
+    "cancel-title": "¡Cancelado!",
+    "delete-title": "¡Eliminado!",
+    "delete-confirmation": "¿Estás seguro de que quieres eliminar este examen?",
+    "delete-success": "El examen se eliminó correctamente.",
+    "delete-warning": "¡No podrás deshacer esta acción!",
+    "delete-yes": "Sí, eliminar",
+    "delete-no": "No, cancelar",
+    "delete-cancel": "Eliminación cancelada",
+
+    "delete-error": "Ocurrió un error al eliminar el examen. Por favor, inténtalo de nuevo.",
+    "update-success": "El examen se actualizó correctamente.",
+    "update-error": "Ocurrió un error al actualizar el examen. Por favor, inténtalo de nuevo.",
+    "add-success": "El examen se añadió correctamente.",
+    "add-error": "Ocurrió un error al añadir el examen. Por favor, inténtalo de nuevo."
+}
+}

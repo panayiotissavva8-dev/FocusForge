@@ -1,0 +1,71 @@
+{
+    "add-exam-button": "Προσθήκη Εξέτασης",
+    "update-exam-button": "Ενημέρωση Εξέτασης",
+    "settings-button": "Ρυθμίσεις",
+    "title-sub-text": "Διαχειριστείτε τις επερχόμενες εξετάσεις σας",
+    "upcoming-exams": "Επερχόμενες",
+    "completed-exams": "Ολοκληρωμένες",
+    "no-upcoming-exams": "Δεν υπάρχουν επερχόμενες εξετάσεις",
+    "no-upcoming-sub-text": "Προσθέστε την πρώτη σας εξέταση για να ξεκινήσετε την παρακολούθηση της μελέτης σας",
+    "no-completed-exams": "Δεν υπάρχουν ολοκληρωμένες εξετάσεις",
+    "no-completed-sub-text": "Σημειώστε τις εξετάσεις ως ολοκληρωμένες για να εμφανιστούν εδώ",
+
+    "add-new-exam": "Προσθήκη Νέας Εξέτασης",
+    "add-new-exam-sub-text": "Εισάγετε τα στοιχεία της επερχόμενης εξέτασης.",
+    "exam-date": "Ημερομηνία Εξέτασης",
+    "exam-name": "Όνομα Μαθήματος",
+    "exam-name-placeholder": "π.χ. Μαθηματικά",
+    
+    "difficulty": "Επίπεδο Δυσκολίας",
+    "difficulty-none": "Καμία",
+    "difficulty-low": "Χαμηλό",
+    "difficulty-medium": "Μέτριο",
+    "difficulty-high": "Υψηλό",
+
+    "overdue": "Εκπρόθεσμη",
+    "completed": "Ολοκληρωμένη",
+
+    "reminder": "Υπενθύμιση",
+    "reminder-none": "Καμία",
+    "reminder-1day": "1 ημέρα πριν",
+    "reminder-3days": "3 ημέρες πριν",
+    "reminder-1week": "1 εβδομάδα πριν",
+    "mark-as-completed": "Σήμανση ως Ολοκληρωμένη",
+    "grade": "Βαθμός",
+    "exam-grade-placeholder": "π.χ. Άριστα",
+    "exam-cancel": "Ακύρωση",
+
+    "settings-title": "Ρυθμίσεις",
+    "settings-sub-text": "Προσαρμόστε την εμπειρία σας στο FocusForge.",
+
+    "theme": "Θέμα",
+    "theme-light": "Φωτεινό",
+    "theme-dark": "Σκοτεινό",
+
+    "language": "Γλώσσα",
+    "language-english": "Αγγλικά",
+    "language-spanish": "Ισπανικά",
+    "language-french": "Γαλλικά",
+    "language-greek": "Ελληνικα",
+
+    "settings-close": "Κλείσιμο",
+
+    "sign-out": "Αποσύνδεση",
+
+    "alert": {
+    "cancel-title": "Ακυρώθηκε!",
+    "delete-title": "Διαγράφηκε!",
+    "delete-confirmation": "Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτή την εξέταση;",
+    "delete-success": "Η εξέταση διαγράφηκε επιτυχώς.",
+    "delete-warning": "Δεν θα μπορείτε να το αναιρέσετε!",
+    "delete-yes": "Ναι, διαγραφή",
+    "delete-no": "Όχι, ακύρωση",
+    "delete-cancel": "Η διαγραφή ακυρώθηκε",
+
+    "delete-error": "Παρουσιάστηκε σφάλμα κατά τη διαγραφή της εξέτασης. Παρακαλώ δοκιμάστε ξανά.",
+    "update-success": "Η εξέταση ενημερώθηκε επιτυχώς.",
+    "update-error": "Παρουσιάστηκε σφάλμα κατά την ενημέρωση της εξέτασης. Παρακαλώ δοκιμάστε ξανά.",
+    "add-success": "Η εξέταση προστέθηκε επιτυχώς.",
+    "add-error": "Παρουσιάστηκε σφάλμα κατά την προσθήκη της εξέτασης. Παρακαλώ δοκιμάστε ξανά."
+}
+}
