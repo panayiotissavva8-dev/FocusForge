@@ -38,7 +38,7 @@
 /* HEADINGS */
 .auth-container h1 {
     text-align: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
     color: var(--color-gray-900);
     font-size: 1.5rem;
 }
@@ -123,7 +123,7 @@
 /* PRIMARY BUTTON */
 #sign {
     width: 100%;
-    padding: 1rem;
+    padding: 0.6rem;
     background-color: var(--color-primary);
     color: var(--color-white);
     border: none;
@@ -133,7 +133,7 @@
     cursor: pointer;
     transition: 0.2s ease;
     margin-top: 0.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     -webkit-appearance: none;
     appearance: none;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
@@ -197,12 +197,14 @@
     display: flex;
     align-items: flex-start;
     gap: 0.5rem;
+    margin-top: 1rem;
     margin-bottom: 1rem;
 }
 
 @media (max-width: 640px) {
     .auth-container .checkbox-group {
         gap: 0.625rem;
+        margin-top: 1rem;
         margin-bottom: 0.875rem;
     }
 }
@@ -219,11 +221,12 @@
     .auth-container input[type="checkbox"] {
         width: 1.25rem;
         height: 1.25rem;
-        margin-top: 0;
+        margin-top: 1;
     }
 }
 
 .auth-container .checkbox-group label {
+    margin-top: 1rem;
     margin-bottom: 0;
     font-size: 0.875rem;
     cursor: pointer;

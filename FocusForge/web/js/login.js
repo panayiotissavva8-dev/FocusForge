@@ -15,6 +15,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+auth.languageCode = 'en'
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -65,7 +66,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const password = document.getElementById("password").value.trim();
 
         if (!username || !password) {
-            alert("Enter username and password");
+            Swal.fire({
+                title: "Error!",
+                text: "Enter username and password!",
+                icon: "error"
+            });
             return;
         }
 
@@ -92,7 +97,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (failed_count >= 5) {
                     cooldown_until = Date.now() + 10 * 60 * 1000;
                     localStorage.setItem("cooldown_until", cooldown_until);
-                    alert("Too many failed attempts. Please try again in 10 minutes.");
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Too many attempts,Try again in 10 minutes!",
+                        icon: "error"
+                    });
                 }
 
                 updateLoginState();
@@ -110,16 +119,41 @@ document.addEventListener("DOMContentLoaded", () => {
     // Update countdown every second
     setInterval(updateLoginState, 1000);
 
-    document.getElementById("googleLogin").addEventListener("click", async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+    const googleLogin = document.getElementById("googleLogin");
+    googleLogin.addEventListener("click", async function(){
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            const payload = { user: { uid: user.uid, email: user.email, displayName: user.displayName || user.email?.split("@")[0] || "GoogleUser" } };
 
-      console.log("Logged in:", user);
-    } catch (error) {
-      console.error(error);
-    }
-  });
+            const response = await fetch("/google_api", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(payload)
+            });
 
-   
+            if(response.ok) {
+                const data = await response.json();
+                localStorage.setItem("sessionToken", data.token);
+                localStorage.setItem("user_id", data.user_id);
+                window.location.href = "/dashboard";
+            } else {
+                const text = await response.text();
+                Swal.fire({
+                    title: "Login failed",
+                    text: text,
+                    icon: "error"
+                });
+            }
+        } catch (error) {
+            console.error("Google sign-in failed", error);
+            Swal.fire({
+                title: "Google sign-in failed",
+                text: error.message || "Please try again.",
+                icon: "error"
+            });
+        }
+    });
+
 });
+        

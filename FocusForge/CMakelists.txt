@@ -1,21 +1,24 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 project(FocusForge)
 
 set(CMAKE_CXX_STANDARD 17)
-
-include_directories(
-    include
-    Crow/include
-    json/include
-)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(SQLite3 REQUIRED)
+find_package(OpenSSL REQUIRED)
+find_package(cpr CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(Threads REQUIRED)
 
 add_executable(focusforge
-    src/main.cpp
-    src/routes.cpp
-    src/scheduler.cpp
-    src/storage.cpp
+    src/focus_forge.cpp
 )
 
-target_link_libraries(focusforge SQLite::SQLite3)
+target_link_libraries(focusforge PRIVATE
+    SQLite3::SQLite3
+    OpenSSL::SSL
+    OpenSSL::Crypto
+    cpr::cpr
+    nlohmann_json::nlohmann_json
+    Threads::Threads
+)

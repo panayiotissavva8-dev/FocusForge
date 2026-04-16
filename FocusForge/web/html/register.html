@@ -4,14 +4,16 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>FocusForge - Register</title>
-        <link rel="stylesheet" href="/web/css/register.css">
+        <link rel="stylesheet" href="/web/css/login.css">
         <link rel="stylesheet" href="/web/css/dashboard.css">
         <script type="module" src="/web/js/register.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
     <body class="auth-page">
         <div class="auth-container">
 
-            <h1>Create Account</h1>
+            <h1>Welcome to FocusForge</h1>
+            <h2>Create Account</h2>
 
             <label for="username">Username</label>
             <input type="text" id="username" required minlength="6" maxlength="14">
@@ -27,10 +29,17 @@
 
             <div class="tooltip-wrapper">
                 <button class="btn btn-primary btn-full" id="registerBtn" disabled>Register</button>
-                <span class="tooltip-text">Accept terms and contitions to register</span>
+                <span class="tooltip-text">Accept terms and conditions to register</span>
             </div>
 
             <button class="btn btn-outline btn-full" id="loginBtn">Back to Login</button>
+
+            <p class="choiceText">Or Sign Up With</p>
+            <button class="btn btn-outline btn-full google-btn" id="googleLogin">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo">
+                Continue with Google
+            </button>
+
 
             <div class="terms-check">
 

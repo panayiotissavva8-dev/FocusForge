@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/web/css/dashboard.css">
         <link rel="stylesheet" href="https://googleapis.com">
         <script type="module" src="/web/js/login.js" defer></script>
+         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
     <body class="auth-page">
         <div class="auth-container">
@@ -22,8 +23,10 @@
 
             <button class="btn btn-primary btn-full" id="sign">Sign In</button>
             <button class="btn btn-outline btn-full" id="register">Register</button>
-            <button class="btn btn-outline btn-full google-btn" id="googleLogin" onclick="loginWithGoogle()">
+            <p class="choiceText">Or Sign In With</p>
+            <button class="btn btn-outline btn-full google-btn" id="googleLogin">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo">
+                Continue with Google
             </button></button>
             
 

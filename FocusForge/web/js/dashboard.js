@@ -1,5 +1,4 @@
 
-
 // State
 let exams = [];
 let editingExamId = null;
@@ -20,14 +19,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-     const user = result.user;
-    const token = await user.getIdToken();
 
-    fetch("/auth/firebase", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token })
-});
+
 
     const savedLang = localStorage.getItem("language") || "en";
     await loadLanguage(savedLang);
@@ -126,7 +119,7 @@ async function saveExam(examData) {
          position: "center",
          icon: "success",
          title:translations.alert['add-success'],
-         howConfirmButton: false,
+         showConfirmButton: false,
          timer: 1700
         });
     }

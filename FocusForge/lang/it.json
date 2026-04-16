@@ -1,0 +1,72 @@
+{
+    "add-exam-button": "Aggiungi esame",
+    "update-exam-button": "Aggiorna esame",
+    "settings-button": "Impostazioni",
+    "title-sub-text": "Gestisci i tuoi prossimi esami",
+    "upcoming-exams": "In arrivo",
+    "completed-exams": "Completati",
+    "no-upcoming-exams": "Nessun esame in arrivo",
+    "no-upcoming-sub-text": "Aggiungi il tuo primo esame per iniziare a monitorare lo studio",
+    "no-completed-exams": "Nessun esame completato",
+    "no-completed-sub-text": "Segna gli esami come completati per vederli qui",
+
+    "add-new-exam": "Aggiungi nuovo esame",
+    "add-new-exam-sub-text": "Inserisci i dettagli del tuo prossimo esame.",
+    "exam-date": "Data dell'esame",
+    "exam-name": "Nome della materia",
+    "exam-name-placeholder": "es. Matematica",
+    
+    "difficulty": "Livello di difficoltà",
+    "difficulty-none": "Nessuno",
+    "difficulty-low": "Basso",
+    "difficulty-medium": "Medio",
+    "difficulty-high": "Alto",
+
+    "overdue": "Scaduto",
+    "completed": "Completato",
+
+    "reminder": "Promemoria",
+    "reminder-none": "Nessuno",
+    "reminder-1day": "1 giorno prima",
+    "reminder-3days": "3 giorni prima",
+    "reminder-1week": "1 settimana prima",
+    "mark-as-completed": "Segna come completato",
+    "grade": "Voto",
+    "exam-grade-placeholder": "es. A+",
+    "exam-cancel": "Annulla",
+
+    "settings-title": "Impostazioni",
+    "settings-sub-text": "Personalizza la tua esperienza FocusForge.",
+
+    "theme": "Tema",
+    "theme-light": "Chiaro",
+    "theme-dark": "Scuro",
+
+    "language": "Lingua",
+    "language-english": "Inglese",
+    "language-spanish": "Spagnolo",
+    "language-french": "Francese",
+    "language-greek": "Greco",
+    "language-italian": "Italiano",
+
+    "settings-close": "Chiudi",
+
+    "sign-out": "Disconnetti",
+    
+    "alert": {
+        "cancel-title": "Annullato!",
+        "delete-title": "Eliminato!",
+        "delete-confirmation": "Sei sicuro di voler eliminare questo esame?",
+        "delete-success": "Esame eliminato con successo.",
+        "delete-warning": "Non potrai annullare questa operazione!",
+        "delete-yes": "Sì, eliminalo",
+        "delete-no": "No, annulla",
+        "delete-cancel": "Eliminazione annullata",
+
+        "delete-error": "Si è verificato un errore durante l'eliminazione dell'esame. Riprova.",
+        "update-success": "Esame aggiornato con successo.",
+        "update-error": "Si è verificato un errore durante l'aggiornamento dell'esame. Riprova.",
+        "add-success": "Esame aggiunto con successo.",
+        "add-error": "Si è verificato un errore durante l'aggiunta dell'esame. Riprova."
+    }
+}

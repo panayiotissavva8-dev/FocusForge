@@ -12,6 +12,10 @@
 #include <ctime>
 #include <cpr/cpr.h>
 #include <nlohmann/json.hpp>
+#include <mutex>
+#include <openssl/pem.h>
+#include <openssl/x509.h>
+
 
 
 sqlite3* db_focus_forge = nullptr;
@@ -21,6 +25,7 @@ using namespace std;
 
 struct UserData {
     int user_id;
+    string firebase_uid;
     string owner;
     string username;
     string password_hash;
@@ -28,6 +33,11 @@ struct UserData {
     int termsAccepted;
     long long terms_accepted_at;
     int failed_count;
+};
+
+struct FirebaseUser {
+    string uid;
+    string email;
 };
 
 struct SubjectData {
@@ -48,6 +58,7 @@ struct SessionData {
 };
 
 std::unordered_map<std::string, SessionData> sessions;
+
 
 // --- UTILITY FUNCTIONS ---
 string hashPassword(const string& password){
@@ -160,10 +171,12 @@ void initializeDatabase(sqlite3* db){
     const char* users_table = R"(
     CREATE TABLE IF NOT EXISTS users(
            user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+           firebase_uid TEXT UNIQUE,
            owner TEXT NOT NULL,
            username TEXT NOT NULL UNIQUE,
-           password_hash TEXT NOT NULL,
+           password_hash TEXT,
            email TEXT NOT NULL,
+           auth_provider TEXT,
            termsAccepted INTEGER NOT NULL DEFAULT 0,
            terms_accepted_at INTEGER NOT NULL DEFAULT 0
            );
@@ -369,8 +382,116 @@ void insertUser(sqlite3* db, const UserData& u){
     }
 
     sqlite3_finalize(stmt);
-
 }
+
+bool loadUserByFirebaseUid(sqlite3* db, UserData& u, const string& firebase_uid) {
+    sqlite3_stmt* stmt;
+    const char* sql = "SELECT user_id, firebase_uid, owner, username, password_hash, email, termsAccepted, terms_accepted_at FROM users WHERE firebase_uid = ?;";
+
+    if(sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        cerr << "Prepare failed" << endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, firebase_uid.c_str(), -1, SQLITE_TRANSIENT);
+
+    bool found = false;
+    if(sqlite3_step(stmt) == SQLITE_ROW) {
+        u.user_id = sqlite3_column_int(stmt, 0);
+        const unsigned char* firebase_uid_text = sqlite3_column_text(stmt, 1);
+        const unsigned char* owner_text = sqlite3_column_text(stmt, 2);
+        const unsigned char* username_text = sqlite3_column_text(stmt, 3);
+        const unsigned char* password_text = sqlite3_column_text(stmt, 4);
+        const unsigned char* email_text = sqlite3_column_text(stmt, 5);
+
+        u.firebase_uid = firebase_uid_text ? reinterpret_cast<const char*>(firebase_uid_text) : "";
+        u.owner = owner_text ? reinterpret_cast<const char*>(owner_text) : "";
+        u.username = username_text ? reinterpret_cast<const char*>(username_text) : "";
+        u.password_hash = password_text ? reinterpret_cast<const char*>(password_text) : "";
+        u.email = email_text ? reinterpret_cast<const char*>(email_text) : "";
+        u.termsAccepted = sqlite3_column_int(stmt, 6);
+        u.terms_accepted_at = sqlite3_column_int(stmt, 7);
+        found = true;
+    }
+
+    sqlite3_finalize(stmt);
+    return found;
+}
+
+bool loadUserByEmail(sqlite3* db, UserData& u, const string& email) {
+    sqlite3_stmt* stmt;
+    const char* sql = "SELECT user_id, firebase_uid, owner, username, password_hash, email, termsAccepted, terms_accepted_at FROM users WHERE email = ?;";
+
+    if(sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        cerr << "Prepare failed" << endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, email.c_str(), -1, SQLITE_TRANSIENT);
+
+    bool found = false;
+    if(sqlite3_step(stmt) == SQLITE_ROW) {
+        u.user_id = sqlite3_column_int(stmt, 0);
+        const unsigned char* firebase_uid_text = sqlite3_column_text(stmt, 1);
+        const unsigned char* owner_text = sqlite3_column_text(stmt, 2);
+        const unsigned char* username_text = sqlite3_column_text(stmt, 3);
+        const unsigned char* password_text = sqlite3_column_text(stmt, 4);
+        const unsigned char* email_text = sqlite3_column_text(stmt, 5);
+
+        u.firebase_uid = firebase_uid_text ? reinterpret_cast<const char*>(firebase_uid_text) : "";
+        u.owner = owner_text ? reinterpret_cast<const char*>(owner_text) : "";
+        u.username = username_text ? reinterpret_cast<const char*>(username_text) : "";
+        u.password_hash = password_text ? reinterpret_cast<const char*>(password_text) : "";
+        u.email = email_text ? reinterpret_cast<const char*>(email_text) : "";
+        u.termsAccepted = sqlite3_column_int(stmt, 6);
+        u.terms_accepted_at = sqlite3_column_int(stmt, 7);
+        found = true;
+    }
+
+    sqlite3_finalize(stmt);
+    return found;
+}
+
+bool updateUserFirebaseUid(sqlite3* db, int user_id, const string& firebase_uid) {
+    sqlite3_stmt* stmt;
+    const char* sql = "UPDATE users SET firebase_uid = ? WHERE user_id = ?;";
+
+    if(sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        cerr << "Prepare failed" << endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, firebase_uid.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 2, user_id);
+
+    int rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    return rc == SQLITE_DONE;
+}
+
+bool insertFirebaseUser(sqlite3* db, const UserData& u) {
+    sqlite3_stmt* stmt;
+    const char* sql = "INSERT INTO users (firebase_uid, owner, username, password_hash, email, termsAccepted, terms_accepted_at) VALUES (?, ?, ?, ?, ?, ?, ?);";
+
+    if(sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        cerr << "Prepare failed" << endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, u.firebase_uid.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, u.owner.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, u.username.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 4, u.password_hash.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 5, u.email.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 6, u.termsAccepted ? 1 : 0);
+    sqlite3_bind_int64(stmt, 7, u.terms_accepted_at);
+
+    int rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    return rc == SQLITE_DONE;
+}
+
+// Verify firebase token
 
 
 
@@ -464,12 +585,15 @@ void reminderLoop(sqlite3* db) {
         // Sleep for 1 hour
         std::this_thread::sleep_for(std::chrono::hours(1));
     }
-}
+};
+
+  
 
 
 
 
 int main(){
+    #define ASIO_STANDALONE
 
     loadEnv();
     
@@ -589,34 +713,73 @@ int main(){
         return crow::response(200, "Register Successfully");
     });
 
-// TODO 
-    // --- FIREBASE AUTH --- 
-    CROW_ROUTE(app, "/auth/firebase").methods("POST"_method)
-([](const crow::request& req){
-    auto body = crow::json::load(req.body);
 
-    if (!body) {
-        return crow::response(400, "Invalid JSON");
-    }
 
-    std::string token = body["token"].s();
+    CROW_ROUTE(app, "/google_api").methods("POST"_method)([](const crow::request& req){
+        auto body = crow::json::load(req.body);
+        if(!body) return crow::response(400, "Invalid JSON");
 
-    // STEP 1: verify token
-    bool valid = verifyFirebaseToken(token);
+        string firebase_uid;
+        string email;
+        string displayName;
 
-    if (!valid) {
-        return crow::response(401, "Invalid token");
-    }
+        if(body.has("user") && body["user"].t() == crow::json::type::Object) {
+            auto userNode = body["user"];
+            if(userNode.has("uid")) firebase_uid = userNode["uid"].s();
+            if(userNode.has("email")) email = userNode["email"].s();
+            if(userNode.has("displayName")) displayName = userNode["displayName"].s();
+        } else {
+            if(body.has("firebase_uid")) firebase_uid = body["firebase_uid"].s();
+            if(body.has("uid")) firebase_uid = body["uid"].s();
+            if(body.has("email")) email = body["email"].s();
+            if(body.has("displayName")) displayName = body["displayName"].s();
+        }
 
-    // STEP 2: extract user info (uid/email)
-    auto user = decodeFirebaseToken(token);
+        if(firebase_uid.empty() || email.empty()) {
+            return crow::response(400, "Missing firebase_uid or email");
+        }
 
-    crow::json::wvalue res;
-    res["uid"] = user.uid;
-    res["email"] = user.email;
+        if(displayName.empty()) {
+            displayName = email.substr(0, email.find('@'));
+        }
 
-    return crow::response(res);
-});
+        UserData u;
+        bool found = loadUserByFirebaseUid(db_focus_forge, u, firebase_uid);
+        if(!found) {
+            if(loadUserByEmail(db_focus_forge, u, email)) {
+                // Associate existing email account with Firebase UID
+                u.firebase_uid = firebase_uid;
+                updateUserFirebaseUid(db_focus_forge, u.user_id, firebase_uid);
+            } else {
+                u.firebase_uid = firebase_uid;
+                u.owner = displayName;
+                u.username = email;
+                u.password_hash = "";
+                u.email = email;
+                u.termsAccepted = 1;
+                u.terms_accepted_at = time(nullptr);
+
+                if(!insertFirebaseUser(db_focus_forge, u)) {
+                    return crow::response(500, "Unable to store Google user");
+                }
+                u.user_id = static_cast<int>(sqlite3_last_insert_rowid(db_focus_forge));
+            }
+        }
+
+        string token = firebase_uid + "-" + to_string(chrono::system_clock::now().time_since_epoch().count());
+        sessions[token] = SessionData{displayName, u.user_id};
+
+        crow::json::wvalue res;
+        res["status"] = "success";
+        res["username"] = displayName;
+        res["user_id"] = u.user_id;
+        res["token"] = token;
+
+        return crow::response(res);
+    });
+    
+
+
 
 
 
@@ -837,7 +1000,14 @@ int main(){
     // --- RUN SERVER --- 
     int port = 5001;
     if(const char* env_p = getenv("PORT")){
-        port = stoi(env_p);
+        string envPort = env_p;
+        if(!envPort.empty()) {
+            try {
+                port = stoi(envPort);
+            } catch(const std::exception& e) {
+                cerr << "Warning: invalid PORT value '" << envPort << "', using default " << port << "\n";
+            }
+        }
     }
 
     app.bindaddr("0.0.0.0").port(port).multithreaded().run();
@@ -849,15 +1019,10 @@ int main(){
 }
 
 // --- COMPILE COMMAND ---
-/*
- g++ -std=c++17 src/focus_forge.cpp -o focusforge \
--I Crow/include \
--I /opt/homebrew/include \
--I /opt/homebrew/opt/openssl@3/include \
--L /opt/homebrew/Cellar/cpr/1.14.2/lib \
--L /opt/homebrew/opt/openssl@3/lib \
--lcpr -lcurl -lssl -lcrypto -lsqlite3 -lpthread \
--Wl,-rpath,/opt/homebrew/Cellar/cpr/1.14.2/lib
-./focusforge
 
+/*
+rm -rf build
+cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=~/vcpkg/scripts/buildsystems/vcpkg.cmake -G "Unix Makefiles"
+cmake --build build --target focusforge
+./build/focusforge
 */
