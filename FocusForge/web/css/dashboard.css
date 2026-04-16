@@ -313,7 +313,7 @@ h3 {
 /* Responsive Typography */
 @media (max-width: 640px) {
     h1 {
-        font-size: 1.25rem;
+        font-size: 1rem;
     }
     
     h2 {
@@ -374,12 +374,42 @@ h3 {
 }
 
 @media (max-width: 640px) {
+    .menubar {
+        padding-top: 4.5rem;
+    }
+
     .brand {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background-color: var(--color-white);
+        border-bottom: 1px solid var(--color-gray-200);
         gap: 0.5rem;
     }
-    
+
     .brand h1 {
         font-size: 1.125rem;
+    }
+
+    .menubar-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .menubar-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .settings-btn {
+        position: fixed;
+        top: 0.4rem;
+        right: 1rem;
+        z-index: 110;
     }
 }
 
@@ -415,8 +445,8 @@ h3 {
 }
 
 .icon-lg {
-    width: 2rem;
-    height: 2rem;
+    width: 1rem;
+    height: 1rem;
 }
 
 @media (max-width: 640px) {
