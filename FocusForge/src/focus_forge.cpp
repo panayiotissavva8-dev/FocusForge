@@ -122,6 +122,12 @@ time_t calculateReminders(const string& deadline, const int reminder) {
     return deadline_time; // no reminder
 }
 
+time_t parseDeadline(const std::string& deadline) {
+    struct tm tm_deadline = {};
+    strptime(deadline.c_str(), "%Y-%m-%d", &tm_deadline);
+    return mktime(&tm_deadline);
+}
+
 void loadEnv() {
     std::ifstream file("secret.env");
     std::string line;
@@ -491,29 +497,60 @@ bool insertFirebaseUser(sqlite3* db, const UserData& u) {
     return rc == SQLITE_DONE;
 }
 
-// Verify firebase token
 
-
-
-
-
-void sendExamReminder(const std::string& userEmail, const std::string& examName,  const std::string& examDate, const std::string& examDifficulty, const std::string& examReminder, const string username) 
-{
-
+void sendExamReminder(
+    const std::string& userEmail,
+    const std::string& examName,
+    const std::string& examDate,
+    int difficulty,
+    int reminderDays,
+    const std::string& username
+) {
     const char* key = getenv("SENDGRID_API_KEY");
     std::string SENDGRID_API_KEY = key ? key : "";
     const std::string FROM_EMAIL = "focusforgereminder@gmail.com";
-    
+
+    // Calculate countdown
+    time_t now = time(nullptr);
+    time_t deadline_time = parseDeadline(examDate);
+    int daysLeft = std::max(0, (int)ceil((deadline_time - now) / 86400.0));
+
+    // Priority mapping
+    std::string priority = difficultyToString(difficulty);
+    std::string color;
+
+    if (difficulty == 3) color = "#ef4444";       // High
+    else if (difficulty == 2) color = "#f59e0b";  // Medium
+    else if (difficulty == 1) color = "#10b981";  // Low
+    else color = "#10b981";                       // None
+
+    int progress = reminderDays > 0 ? (int)((3 - reminderDays) / 3.0 * 100) : 100;
+
     nlohmann::json body = {
-        {"personalizations", {{
-            {"to", {{{"email", userEmail}}}},
-            {"subject", "Exam Reminder: " + examName}
-        }}},
+    {"personalizations", {{
+        {"to", {{{"email", userEmail}}}},
+        {"subject", "Exam Reminder: " + examName},
+        {"dynamic_template_data", {
+            {"name", username},
+            {"ctaUrl", "https://yourapp.com/dashboard"},
+            {"exams", {{
+                {
+                    {"examName", examName},
+                    {"date", examDate},
+                    {"priority", difficultyToString(difficulty)},
+                    {"priorityColor",
+                        (difficulty == 3 ? "#ef4444" :
+                         difficulty == 2 ? "#f59e0b" :
+                         difficulty == 1 ? "#10b981" : "#10b981")},
+                    {"countdown",
+                        (int)std::max(0.0, ceil((parseDeadline(examDate) - time(nullptr)) / 86400.0))},
+                    {"progress", 50}
+                }
+            }}}
+        }}
+    }}},
         {"from", {{"email", FROM_EMAIL}}},
-        {"content", {{
-            {"type", "text/plain"},
-            {"value", "Hi " + username +",\n\nThis is a friendly reminder that you have an upcoming exam:\n\nSubject: " + examName + "\nDate: " + examDate + "\nDifficulty: " + examDifficulty + "\nReminder set for: " + examReminder + " before the exam" + "\n\n“Success is walking from failure to failure with no loss of enthusiasm.” - Winston Churchill" + "\n\nGood luck with your studies, \nFocusForge Team"}
-        }}}
+        {"template_id", "d-aef59a79a87a4089ba6c03230b0b2310"}
     };
 
     auto r = cpr::Post(
@@ -526,49 +563,87 @@ void sendExamReminder(const std::string& userEmail, const std::string& examName,
     );
 
     if (r.status_code == 202) {
-        std::cout << "Email sent successfully to " << userEmail << "\n";
+        std::cout << "Email sent to " << userEmail << "\n";
     } else {
-        std::cout << "Failed to send email. Status: " << r.status_code 
-                  << " Response: " << r.text << "\n";
+        std::cout << "Failed: " << r.status_code << " " << r.text << "\n";
     }
 }
 
-void reminderLoop(sqlite3* db) {
-    while(true) {
-        try {
-            cout << "[Reminder] Checking subjects..." << endl;
-            
-            // Load all subjects for all users
-            sqlite3_stmt* stmt;
-            const char* sql = "SELECT s.subject_id, s.user_id, s.name, s.deadline, s.reminder, s.reminder_sent, s.difficulty, u.email "
-                              "FROM subjects s "
-                              "JOIN users u ON s.user_id = u.user_id "
-                              "WHERE s.reminder_sent = 0;";
 
-            if(sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-                cerr << "[Reminder] DB prepare failed: " << sqlite3_errmsg(db) << endl;
-                goto sleep_hour;
+
+void reminderLoop(sqlite3* db) {
+    while (true) {
+        try {
+            std::cout << "[Reminder] Checking subjects..." << std::endl;
+
+            sqlite3_stmt* stmt;
+
+            const char* sql =
+                "SELECT s.subject_id, s.user_id, s.name, s.deadline, "
+                "s.reminder, s.difficulty, u.email "
+                "FROM subjects s "
+                "JOIN users u ON s.user_id = u.user_id "
+                "WHERE s.reminder_sent = 0;";
+
+            if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+                std::cerr << "[Reminder] DB prepare failed: "
+                          << sqlite3_errmsg(db) << std::endl;
+                std::this_thread::sleep_for(std::chrono::hours(1));
+                continue;
             }
 
             time_t now = time(nullptr);
-            while(sqlite3_step(stmt) == SQLITE_ROW) {
+
+            auto safeText = [&](int col) -> std::string {
+                const unsigned char* txt = sqlite3_column_text(stmt, col);
+                return txt ? std::string(reinterpret_cast<const char*>(txt)) : "";
+            };
+
+            while (sqlite3_step(stmt) == SQLITE_ROW) {
+
                 int subject_id = sqlite3_column_int(stmt, 0);
-                int user_id = sqlite3_column_int(stmt, 1);
-                string name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
-                string deadline = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
-                int reminder = sqlite3_column_int(stmt, 4);
-                int reminder_sent = sqlite3_column_int(stmt, 5);
-                int difficulty = sqlite3_column_int(stmt, 6);
-                string email = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
+                int difficulty  = sqlite3_column_int(stmt, 5);
+                int reminder    = sqlite3_column_int(stmt, 4);
+
+                std::string name     = safeText(2);
+                std::string deadline = safeText(3);
+                std::string email    = safeText(6);
+
+                if (reminder <= 0) continue;
 
                 time_t reminder_time = calculateReminders(deadline, reminder);
-                if(now >= reminder_time) {
-                    sendExamReminder(email, name, deadline, difficultyToString(difficulty), reminderToString(reminder), sessions.find(email) != sessions.end() ? sessions[email].username : "Student");
 
-                    // Mark reminder as sent
+                std::cout << "[DEBUG] Exam: " << name << "\n";
+std::cout << "[DEBUG] now: " << now << "\n";
+std::cout << "[DEBUG] reminder_time: " << reminder_time << "\n";
+std::cout << "[DEBUG] diff: " << (long)(now - reminder_time) << "\n";
+
+                // 1-hour trigger window to avoid missing execution
+                if (now >= reminder_time) {
+
+                    std::string username =
+                        sessions.find(email) != sessions.end()
+                            ? sessions[email].username
+                            : "Student";
+
+                    sendExamReminder(
+                        email,
+                        name,
+                        deadline,
+                        difficulty,
+                        reminder,
+                        username
+                    );
+
+                    std::cout << "[Reminder Triggered] "
+                              << name << " -> " << email << std::endl;
+
+                    // Mark as sent
                     sqlite3_stmt* updateStmt;
-                    const char* updateSql = "UPDATE subjects SET reminder_sent = 1 WHERE subject_id = ?;";
-                    if(sqlite3_prepare_v2(db, updateSql, -1, &updateStmt, nullptr) == SQLITE_OK) {
+                    const char* updateSql =
+                        "UPDATE subjects SET reminder_sent = 1 WHERE subject_id = ?;";
+
+                    if (sqlite3_prepare_v2(db, updateSql, -1, &updateStmt, nullptr) == SQLITE_OK) {
                         sqlite3_bind_int(updateStmt, 1, subject_id);
                         sqlite3_step(updateStmt);
                         sqlite3_finalize(updateStmt);
@@ -577,15 +652,14 @@ void reminderLoop(sqlite3* db) {
             }
 
             sqlite3_finalize(stmt);
-        } catch(const std::exception& e) {
-            cerr << "[Reminder] Exception: " << e.what() << endl;
+
+        } catch (const std::exception& e) {
+            std::cerr << "[Reminder] Exception: " << e.what() << std::endl;
         }
 
-        sleep_hour:
-        // Sleep for 1 hour
         std::this_thread::sleep_for(std::chrono::hours(1));
     }
-};
+}
 
   
 

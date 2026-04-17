@@ -107,17 +107,20 @@
   "sessions": "sessions",
   "break": "Break",
 
-  "topic-core-concepts-review": "Core concepts review",
-  "topic-practice-questions": "Practice questions",
-  "topic-weak-areas-reinforcement": "Weak areas reinforcement",
-  "topic-timed-exercises": "Timed exercises",
-  "topic-full-exam-simulation": "Full exam simulation",
-
-  "weekday-monday": "Monday",
-  "weekday-tuesday": "Tuesday",
-  "weekday-wednesday": "Wednesday",
-  "weekday-thursday": "Thursday",
-  "weekday-friday": "Friday",
-  "weekday-saturday": "Saturday",
-  "weekday-sunday": "Sunday"
+"topic-core-concepts-review": "Core Concepts Review",
+"topic-practice-questions": "Practice Questions",
+"topic-weak-areas-reinforcement": "Weak Areas Reinforcement",
+"topic-timed-exercises": "Timed Exercises",
+"topic-full-exam-simulation": "Full Exam Simulation",
+"study-window-start": "Study Window Start",
+"study-window-start-hint": "Earliest you will start studying",
+"study-window-end-hint": "Latest you will finish studying",
+"study-window-end": "Study Window End",
+"pref-err-window": "Study end time must be after start time.",
+"pref-err-hours": "Study hours ({h}h) exceed the study window ({w}h).",
+"pref-err-session": "Session length is longer than the study window.",
+"pref-err-block": "One session + break exceeds your total daily study hours.",
+"day": "Day",
+"minutes": "minutes",
+"generated": "Generated"
 }

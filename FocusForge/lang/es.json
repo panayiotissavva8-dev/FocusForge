@@ -108,18 +108,21 @@
   "break": "Descanso",
 
   "topic-core-concepts-review": "Revisión de conceptos clave",
-  "topic-practice-questions": "Preguntas de práctica",
-  "topic-weak-areas-reinforcement": "Refuerzo de áreas débiles",
-  "topic-timed-exercises": "Ejercicios cronometrados",
-  "topic-full-exam-simulation": "Simulación de examen completo",
-
-  "weekday-monday": "Lunes",
-  "weekday-tuesday": "Martes",
-  "weekday-wednesday": "Miércoles",
-  "weekday-thursday": "Jueves",
-  "weekday-friday": "Viernes",
-  "weekday-saturday": "Sábado",
-  "weekday-sunday": "Domingo"
+"topic-practice-questions": "Preguntas de práctica",
+"topic-weak-areas-reinforcement": "Refuerzo de áreas débiles",
+"topic-timed-exercises": "Ejercicios cronometrados",
+"topic-full-exam-simulation": "Simulación completa de examen",
+"study-window-start": "Inicio del periodo de estudio",
+"study-window-end": "Fin del periodo de estudio",
+"study-window-start-hint": "La hora más temprana en la que empezarás a estudiar",
+"study-window-end-hint": "La hora más tardía en la que terminarás de estudiar",
+"pref-err-window": "La hora de fin debe ser posterior a la de inicio.",
+"pref-err-hours": "Las horas de estudio ({h}h) superan el periodo de estudio ({w}h).",
+"pref-err-session": "La duración de la sesión es mayor que el periodo de estudio.",
+"pref-err-block": "Una sesión + descanso supera tus horas diarias de estudio.",
+"day": "Día",
+"minutes": "minutos",
+"generated": "Generado"
 
 
 

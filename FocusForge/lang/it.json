@@ -108,18 +108,21 @@
   "sessions": "sessioni",
   "break": "Pausa",
 
-  "topic-core-concepts-review": "Revisione dei concetti di base",
-  "topic-practice-questions": "Domande di pratica",
-  "topic-weak-areas-reinforcement": "Rinforzo delle aree deboli",
-  "topic-timed-exercises": "Esercizi cronometrati",
-  "topic-full-exam-simulation": "Simulazione completa dell'esame",
-
-  "weekday-monday": "Lunedì",
-  "weekday-tuesday": "Martedì",
-  "weekday-wednesday": "Mercoledì",
-  "weekday-thursday": "Giovedì",
-  "weekday-friday": "Venerdì",
-  "weekday-saturday": "Sabato",
-  "weekday-sunday": "Domenica"
+"topic-core-concepts-review": "Revisione dei concetti chiave",
+"topic-practice-questions": "Domande di pratica",
+"topic-weak-areas-reinforcement": "Rinforzo delle aree deboli",
+"topic-timed-exercises": "Esercizi a tempo",
+"topic-full-exam-simulation": "Simulazione completa d'esame",
+"study-window-start": "Inizio della finestra di studio",
+"study-window-end": "Fine della finestra di studio",
+"study-window-start-hint": "L'ora più presto in cui inizierai a studiare",
+"study-window-end-hint": "L'ora più tardi in cui finirai di studiare",
+"pref-err-window": "L'ora di fine deve essere successiva a quella di inizio.",
+"pref-err-hours": "Le ore di studio ({h}h) superano la finestra di studio ({w}h).",
+"pref-err-session": "La durata della sessione è maggiore della finestra di studio.",
+"pref-err-block": "Una sessione + pausa supera le ore di studio giornaliere.",
+"day": "Giorno",
+"minutes": "minuti",
+"generated": "Generato"
 
 }

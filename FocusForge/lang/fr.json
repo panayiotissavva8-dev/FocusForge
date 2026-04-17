@@ -108,18 +108,21 @@
   "sessions": "sessions",
   "break": "Pause",
 
-  "topic-core-concepts-review": "Révision des concepts clés",
-  "topic-practice-questions": "Questions pratiques",
-  "topic-weak-areas-reinforcement": "Renforcement des points faibles",
-  "topic-timed-exercises": "Exercices chronométrés",
-  "topic-full-exam-simulation": "Simulation d'examen complet",
-
-  "weekday-monday": "Lundi",
-  "weekday-tuesday": "Mardi",
-  "weekday-wednesday": "Mercredi",
-  "weekday-thursday": "Jeudi",
-  "weekday-friday": "Vendredi",
-  "weekday-saturday": "Samedi",
-  "weekday-sunday": "Dimanche"
+ "topic-core-concepts-review": "Révision des concepts clés",
+"topic-practice-questions": "Questions pratiques",
+"topic-weak-areas-reinforcement": "Renforcement des points faibles",
+"topic-timed-exercises": "Exercices chronométrés",
+"topic-full-exam-simulation": "Simulation d'examen complète",
+"study-window-start": "Début de la période d'étude",
+"study-window-start-hint": "Heure la plus tôt à laquelle vous commencerez à étudier",
+"study-window-end-hint": "Heure la plus tardive à laquelle vous terminerez d'étudier",
+"study-window-end": "Fin de la période d'étude",
+"pref-err-window": "L'heure de fin doit être après l'heure de début.",
+"pref-err-hours": "Les heures d'étude ({h}h) dépassent la période d'étude ({w}h).",
+"pref-err-session": "La durée de la session est supérieure à la période d'étude.",
+"pref-err-block": "Une session + pause dépasse vos heures d'étude quotidiennes.",
+"day": "Jour",
+"minutes": "minutes",
+"generated": "Généré"
 
 }

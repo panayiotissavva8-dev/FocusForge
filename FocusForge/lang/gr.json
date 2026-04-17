@@ -108,17 +108,20 @@
   "sessions": "συνεδρίες",
   "break": "Διάλειμμα",
 
-  "topic-core-concepts-review": "Ανασκόπηση βασικών εννοιών",
-  "topic-practice-questions": "Ερωτήσεις εξάσκησης",
-  "topic-weak-areas-reinforcement": "Ενίσχυση αδύναμων σημείων",
-  "topic-timed-exercises": "Ασκήσεις με χρονομέτρηση",
-  "topic-full-exam-simulation": "Πλήρης προσομοίωση εξέτασης",
-
-  "weekday-monday": "Δευτέρα",
-  "weekday-tuesday": "Τρίτη",
-  "weekday-wednesday": "Τετάρτη",
-  "weekday-thursday": "Πέμπτη",
-  "weekday-friday": "Παρασκευή",
-  "weekday-saturday": "Σάββατο",
-  "weekday-sunday": "Κυριακή"
+  "topic-core-concepts-review": "Επανάληψη βασικών εννοιών",
+"topic-practice-questions": "Ερωτήσεις εξάσκησης",
+"topic-weak-areas-reinforcement": "Ενίσχυση αδύναμων σημείων",
+"topic-timed-exercises": "Ασκήσεις με χρονικό περιορισμό",
+"topic-full-exam-simulation": "Πλήρης προσομοίωση εξέτασης",
+"study-window-start": "Έναρξη περιόδου μελέτης",
+"study-window-end": "Λήξη περιόδου μελέτης",
+"study-window-start-hint": "Η νωρίτερη ώρα που θα ξεκινήσεις τη μελέτη",
+"study-window-end-hint": "Η πιο αργή ώρα που θα ολοκληρώσεις τη μελέτη",
+"pref-err-window": "Η ώρα λήξης πρέπει να είναι μετά την ώρα έναρξης.",
+"pref-err-hours": "Οι ώρες μελέτης ({h}h) υπερβαίνουν την περίοδο μελέτης ({w}h).",
+"pref-err-session": "Η διάρκεια συνεδρίας είναι μεγαλύτερη από την περίοδο μελέτης.",
+"pref-err-block": "Μία συνεδρία + διάλειμμα υπερβαίνει τις συνολικές ημερήσιες ώρες μελέτης.",
+"day": "Ημέρα",
+"minutes": "λεπτά",
+"generated": "Δημιουργήθηκε"
 }
