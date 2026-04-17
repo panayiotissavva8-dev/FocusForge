@@ -894,6 +894,59 @@ int main(){
     });
 
 
+// To use AI uncomment the following code and make sure to set the ANTHROPIC_API_KEY environment variable with your API key from Anthropic. 
+//This API will receive a prompt from the frontend, send it to the Anthropic API, and return the generated study plan back to the frontend.
+    // --- STUDY PLAN API ---
+    /*
+    CROW_ROUTE(app, "/api/study-plan").methods("POST"_method)
+([](const crow::request& req) {
+
+    auto body = json::parse(req.body);
+    std::string prompt = body["prompt"];
+
+    cpr::Response r = cpr::Post(
+        cpr::Url{"https://api.anthropic.com/v1/messages"},
+        cpr::Header{
+            {"Content-Type", "application/json"},
+            {"x-api-key", std::getenv("ANTHROPIC_API_KEY")},
+            {"anthropic-version", "2023-06-01"}
+        },
+        cpr::Body{
+            json({
+                {"model", "claude-sonnet-4-20250514"},
+                {"max_tokens", 1024},
+                {"messages", {{{"role", "user"}, {"content", prompt}}}}
+            }).dump()
+        }
+    );
+
+    if (r.status_code != 200) {
+        return crow::response(500, "AI request failed");
+    }
+
+    auto data = json::parse(r.text);
+
+    std::string raw;
+    for (auto& block : data["content"]) {
+        if (block["type"] == "text") {
+            raw += block["text"];
+        }
+    }
+
+    raw.erase(remove_if(raw.begin(), raw.end(), [](char c){
+        return c == '`';
+    }), raw.end());
+
+    auto parsed = json::parse(raw);
+
+    return crow::response(parsed.dump());
+});
+
+*/
+
+
+
+
     // --- PATHS --- 
 
     // --- LOGIN PAGE ---

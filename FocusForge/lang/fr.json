@@ -68,5 +68,58 @@
     "update-error": "Une erreur s'est produite lors de la mise à jour de l'examen. Veuillez réessayer.",
     "add-success": "L'examen a été ajouté avec succès.",
     "add-error": "Une erreur s'est produite lors de l'ajout de l'examen. Veuillez réessayer."
-}
+},
+
+
+  "study-plan": "Plan d'étude",
+  "no-study-plan": "Pas encore de plan d'étude",
+  "no-study-plan-sub-text": "Ajoutez des examens à venir pour générer un plan d'étude IA",
+
+  "your-upcoming-exams": "Vos examens à venir",
+  "ai-plan-description": "L'IA créera un plan d'étude personnalisé pour ces examens",
+
+  "study-preferences": "Préférences d'étude",
+  "study-preferences-sub": "Configurez votre emploi du temps et vos pauses",
+
+  "study-hours": "Heures d'étude par jour",
+  "study-hours-hint": "Recommandé : 3-6 heures",
+
+  "session-length": "Durée de session d'étude (minutes)",
+  "session-hint": "Recommandé : 25 ou 50 minutes",
+
+  "break-duration": "Durée de pause (minutes)",
+  "break-hint": "Entre les sessions d'étude",
+
+  "start-date": "Date de début",
+
+  "include-weekends": "Inclure les week-ends dans le plan d'étude",
+
+  "generating": "Génération du plan d'étude IA...",
+
+  "generate-plan": "Générer le plan d'étude IA",
+
+  "your-study-plan": "Votre plan d'étude personnalisé",
+
+  "days": "jours",
+  "per-day": "par jour",
+
+  "download": "Télécharger",
+
+  "sessions": "sessions",
+  "break": "Pause",
+
+  "topic-core-concepts-review": "Révision des concepts clés",
+  "topic-practice-questions": "Questions pratiques",
+  "topic-weak-areas-reinforcement": "Renforcement des points faibles",
+  "topic-timed-exercises": "Exercices chronométrés",
+  "topic-full-exam-simulation": "Simulation d'examen complet",
+
+  "weekday-monday": "Lundi",
+  "weekday-tuesday": "Mardi",
+  "weekday-wednesday": "Mercredi",
+  "weekday-thursday": "Jeudi",
+  "weekday-friday": "Vendredi",
+  "weekday-saturday": "Samedi",
+  "weekday-sunday": "Dimanche"
+
 }

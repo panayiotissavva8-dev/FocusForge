@@ -68,5 +68,60 @@
     "update-error": "Ocurrió un error al actualizar el examen. Por favor, inténtalo de nuevo.",
     "add-success": "El examen se añadió correctamente.",
     "add-error": "Ocurrió un error al añadir el examen. Por favor, inténtalo de nuevo."
-}
+},
+
+  "study-plan": "Plan de estudio",
+  "no-study-plan": "Aún no hay plan de estudio",
+  "no-study-plan-sub-text": "Añade próximos exámenes para generar un plan de estudio con IA",
+
+  "your-upcoming-exams": "Tus próximos exámenes",
+  "ai-plan-description": "La IA creará un plan de estudio personalizado para estos exámenes",
+
+  "study-preferences": "Preferencias de estudio",
+  "study-preferences-sub": "Configura tu horario de estudio y tiempos de descanso",
+
+  "study-hours": "Horas de estudio por día",
+  "study-hours-hint": "Recomendado: 3-6 horas",
+
+  "session-length": "Duración de la sesión de estudio (minutos)",
+  "session-hint": "Recomendado: 25 o 50 minutos",
+
+  "break-duration": "Duración del descanso (minutos)",
+  "break-hint": "Entre sesiones de estudio",
+
+  "start-date": "Fecha de inicio",
+
+  "include-weekends": "Incluir fines de semana en el plan de estudio",
+
+  "generating": "Generando plan de estudio con IA...",
+
+  "generate-plan": "Generar plan de estudio con IA",
+
+  "your-study-plan": "Tu plan de estudio personalizado",
+
+  "days": "días",
+  "per-day": "por día",
+
+  "download": "Descargar",
+
+  "sessions": "sesiones",
+  "break": "Descanso",
+
+  "topic-core-concepts-review": "Revisión de conceptos clave",
+  "topic-practice-questions": "Preguntas de práctica",
+  "topic-weak-areas-reinforcement": "Refuerzo de áreas débiles",
+  "topic-timed-exercises": "Ejercicios cronometrados",
+  "topic-full-exam-simulation": "Simulación de examen completo",
+
+  "weekday-monday": "Lunes",
+  "weekday-tuesday": "Martes",
+  "weekday-wednesday": "Miércoles",
+  "weekday-thursday": "Jueves",
+  "weekday-friday": "Viernes",
+  "weekday-saturday": "Sábado",
+  "weekday-sunday": "Domingo"
+
+
+
+
 }

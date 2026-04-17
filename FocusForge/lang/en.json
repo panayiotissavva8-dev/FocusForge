@@ -68,6 +68,56 @@
         "update-error": "An error occurred while updating the exam. Please try again.",
         "add-success": "Exam added successfully.",
         "add-error": "An error occurred while adding the exam. Please try again."
-    }
+    },
 
+    "study-plan": "Study Plan",
+"no-study-plan": "No study plan yet",
+  "no-study-plan-sub-text": "Add upcoming exams to generate an AI study plan",
+
+  "your-upcoming-exams": "Your Upcoming Exams",
+  "ai-plan-description": "AI will create a personalized study plan for these exams",
+
+  "study-preferences": "Study Preferences",
+  "study-preferences-sub": "Configure your study schedule and break times",
+
+  "study-hours": "Study Hours Per Day",
+  "study-hours-hint": "Recommended: 3-6 hours",
+
+  "session-length": "Study Session Length (minutes)",
+  "session-hint": "Recommended: 25 or 50 minutes",
+
+  "break-duration": "Break Duration (minutes)",
+  "break-hint": "Between study sessions",
+
+  "start-date": "Start Date",
+
+  "include-weekends": "Include weekends in study plan",
+
+  "generating": "Generating AI Study Plan...",
+
+  "generate-plan": "Generate AI Study Plan",
+
+  "your-study-plan": "Your Personalized Study Plan",
+
+  "days": "days",
+  "per-day": "per day",
+
+  "download": "Download",
+
+  "sessions": "sessions",
+  "break": "Break",
+
+  "topic-core-concepts-review": "Core concepts review",
+  "topic-practice-questions": "Practice questions",
+  "topic-weak-areas-reinforcement": "Weak areas reinforcement",
+  "topic-timed-exercises": "Timed exercises",
+  "topic-full-exam-simulation": "Full exam simulation",
+
+  "weekday-monday": "Monday",
+  "weekday-tuesday": "Tuesday",
+  "weekday-wednesday": "Wednesday",
+  "weekday-thursday": "Thursday",
+  "weekday-friday": "Friday",
+  "weekday-saturday": "Saturday",
+  "weekday-sunday": "Sunday"
 }

@@ -68,5 +68,58 @@
         "update-error": "Si è verificato un errore durante l'aggiornamento dell'esame. Riprova.",
         "add-success": "Esame aggiunto con successo.",
         "add-error": "Si è verificato un errore durante l'aggiunta dell'esame. Riprova."
-    }
+    },
+
+    
+  "study-plan": "Piano di studio",
+  "no-study-plan": "Nessun piano di studio ancora",
+  "no-study-plan-sub-text": "Aggiungi esami imminenti per generare un piano di studio AI",
+
+  "your-upcoming-exams": "I tuoi prossimi esami",
+  "ai-plan-description": "L'IA creerà un piano di studio personalizzato per questi esami",
+
+  "study-preferences": "Preferenze di studio",
+  "study-preferences-sub": "Configura il tuo programma di studio e le pause",
+
+  "study-hours": "Ore di studio al giorno",
+  "study-hours-hint": "Consigliato: 3-6 ore",
+
+  "session-length": "Durata sessione di studio (minuti)",
+  "session-hint": "Consigliato: 25 o 50 minuti",
+
+  "break-duration": "Durata pausa (minuti)",
+  "break-hint": "Tra le sessioni di studio",
+
+  "start-date": "Data di inizio",
+
+  "include-weekends": "Includi i fine settimana nel piano di studio",
+
+  "generating": "Generazione piano di studio AI...",
+
+  "generate-plan": "Genera piano di studio AI",
+
+  "your-study-plan": "Il tuo piano di studio personalizzato",
+
+  "days": "giorni",
+  "per-day": "al giorno",
+
+  "download": "Scarica",
+
+  "sessions": "sessioni",
+  "break": "Pausa",
+
+  "topic-core-concepts-review": "Revisione dei concetti di base",
+  "topic-practice-questions": "Domande di pratica",
+  "topic-weak-areas-reinforcement": "Rinforzo delle aree deboli",
+  "topic-timed-exercises": "Esercizi cronometrati",
+  "topic-full-exam-simulation": "Simulazione completa dell'esame",
+
+  "weekday-monday": "Lunedì",
+  "weekday-tuesday": "Martedì",
+  "weekday-wednesday": "Mercoledì",
+  "weekday-thursday": "Giovedì",
+  "weekday-friday": "Venerdì",
+  "weekday-saturday": "Sabato",
+  "weekday-sunday": "Domenica"
+
 }

@@ -52,7 +52,7 @@
             <!-- Tabs -->
             <div class="tabs">
                 <div class="tabs-list">
-                    <button class="tab-trigger active" onclick="switchTab('upcoming')">
+                    <button class="tab-trigger active" onclick="switchTab(event, 'upcoming')">
                         <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
                             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
@@ -60,13 +60,23 @@
                         <span data-i18n="upcoming-exams"></span>
                         (<span id="upcoming-count">0</span>)
                     </button>
-                    <button class="tab-trigger" onclick="switchTab('completed')">
+                    <button class="tab-trigger" onclick="switchTab(event, 'completed')">
                         <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                             <polyline points="22 4 12 14.01 9 11.01"/>
                         </svg>
                         <span data-i18n="completed-exams"></span>
                         (<span id="completed-count">0</span>)
+                    </button>
+                    <button class="tab-trigger" onclick="switchTab(event, 'study')">
+                        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M7 10H6a4 4 0 0 1-4-4 1 1 0 0 1 1-1h3.9a2 2 0 0 0 1.96 1.7L11 7h4l1.14-1.3a2 2 0 0 0 1.96-1.7H21a1 1 0 0 1 1 1 4 4 0 0 1-4 4h-1"/>
+                            <path d="M10 10v10h4V10"/>
+                             <path d="M8 20h8"/>
+                             <path d="M15 3l1 1"/>
+                             <path d="M9 3l-1 1"/>
+                            </svg>
+                        <span data-i18n="study-plan"></span>
                     </button>
                 </div>
 
@@ -86,10 +96,10 @@
                 </div>
 
                 <!-- Completed Tab Content -->
-                <div id="completed-tab" class="tab-content">
+                 <div id="completed-tab" class="tab-content">
                     <div id="completed-exams" class="exam-grid">
                         <!-- Empty state -->
-                        <div class="empty-state">
+                         <div class="empty-state">
                             <svg class="icon icon-xl empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                                 <polyline points="22 4 12 14.01 9 11.01"/>
@@ -97,6 +107,16 @@
                             <h3 data-i18n="no-completed-exams"></h3>
                             <p data-i18n="no-completed-sub-text"></p>
                         </div>
+                    </div>
+                </div>
+                
+                <!-- Study Plan Tab Content -->
+                 <div id="study-tab" class="tab-content">
+    <div id="study-plan-root" class="study-grid">
+        <!-- Rendered by JS -->
+    </div>
+</div>
+                    
                     </div>
                 </div>
             </div>
@@ -193,6 +213,7 @@
                 </div>
             </div>
            
+        </div>
         </div>
     
 
