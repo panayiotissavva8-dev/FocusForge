@@ -149,4 +149,80 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    const AUTH_STRINGS = {
+            en: { title:"Create your account", subtitle:"Manage your upcoming exams",
+                  username:"Username", email:"Email", password:"Password",
+                  confirm:"Confirm Password", terms:"I agree to the",
+                  termsLink:"Terms and Conditions",
+                  register:"Create Account", login:"Back to Sign In",
+                  or:"or", google:"Continue with Google",
+                  userPh:"6–14 characters", emailPh:"you@example.com",
+                  passPh:"6–20 characters", confirmPh:"Repeat your password" },
+            es: { title:"Crea tu cuenta", subtitle:"Gestiona tus próximos exámenes",
+                  username:"Usuario", email:"Correo electrónico", password:"Contraseña",
+                  confirm:"Confirmar contraseña", terms:"Acepto los",
+                  termsLink:"Términos y condiciones",
+                  register:"Crear cuenta", login:"Volver al inicio de sesión",
+                  or:"o", google:"Continuar con Google",
+                  userPh:"6–14 caracteres", emailPh:"tu@ejemplo.com",
+                  passPh:"6–20 caracteres", confirmPh:"Repite la contraseña" },
+            fr: { title:"Créer votre compte", subtitle:"Gérez vos examens à venir",
+                  username:"Nom d'utilisateur", email:"E-mail", password:"Mot de passe",
+                  confirm:"Confirmer le mot de passe", terms:"J'accepte les",
+                  termsLink:"Conditions générales",
+                  register:"Créer un compte", login:"Retour à la connexion",
+                  or:"ou", google:"Continuer avec Google",
+                  userPh:"6–14 caractères", emailPh:"vous@exemple.fr",
+                  passPh:"6–20 caractères", confirmPh:"Répétez le mot de passe" },
+            gr: { title:"Δημιουργία λογαριασμού", subtitle:"Διαχειρίσου τις επερχόμενες εξετάσεις",
+                  username:"Όνομα χρήστη", email:"Email", password:"Κωδικός",
+                  confirm:"Επιβεβαίωση κωδικού", terms:"Αποδέχομαι τους",
+                  termsLink:"Όρους και Προϋποθέσεις",
+                  register:"Δημιουργία λογαριασμού", login:"Πίσω στη σύνδεση",
+                  or:"ή", google:"Συνέχεια με Google",
+                  userPh:"6–14 χαρακτήρες", emailPh:"εσύ@παράδειγμα.gr",
+                  passPh:"6–20 χαρακτήρες", confirmPh:"Επανάληψη κωδικού" },
+            it: { title:"Crea il tuo account", subtitle:"Gestisci i tuoi prossimi esami",
+                  username:"Nome utente", email:"Email", password:"Password",
+                  confirm:"Conferma password", terms:"Accetto i",
+                  termsLink:"Termini e condizioni",
+                  register:"Crea account", login:"Torna al login",
+                  or:"oppure", google:"Continua con Google",
+                  userPh:"6–14 caratteri", emailPh:"tu@esempio.it",
+                  passPh:"6–20 caratteri", confirmPh:"Ripeti la password" },
+        };
+ 
+        function changeAuthLanguage(lang) {
+            localStorage.setItem("language", lang);
+            const s = AUTH_STRINGS[lang] || AUTH_STRINGS.en;
+            document.getElementById("auth-title").textContent      = s.title;
+            document.getElementById("auth-subtitle").textContent   = s.subtitle;
+            document.getElementById("lbl-username").textContent    = s.username;
+            document.getElementById("lbl-email").textContent       = s.email;
+            document.getElementById("lbl-password").textContent    = s.password;
+            document.getElementById("lbl-confirm").textContent     = s.confirm;
+            document.getElementById("lbl-terms").childNodes[0].textContent = s.terms + " ";
+            document.getElementById("lbl-terms-link").textContent  = s.termsLink;
+            document.getElementById("btn-register-text").textContent = s.register;
+            document.getElementById("btn-login-text").textContent  = s.login;
+            document.getElementById("auth-or").textContent         = s.or;
+            document.getElementById("auth-google").textContent     = s.google;
+            document.getElementById("username").placeholder        = s.userPh;
+            document.getElementById("email").placeholder           = s.emailPh;
+            document.getElementById("password").placeholder        = s.passPh;
+            document.getElementById("confirmPassword").placeholder = s.confirmPh;
+        }
+ 
+        // Enable register button only when terms are checked
+        document.addEventListener("DOMContentLoaded", () => {
+            const cb  = document.getElementById("termsCheckbox");
+            const btn = document.getElementById("registerBtn");
+            cb.addEventListener("change", () => btn.disabled = !cb.checked);
+        });
+ 
+        // Restore saved language
+        const savedLang = localStorage.getItem("language") || "en";
+        document.getElementById("auth-lang-select").value = savedLang;
+        changeAuthLanguage(savedLang);
 });

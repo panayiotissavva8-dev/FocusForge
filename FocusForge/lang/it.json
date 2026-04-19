@@ -123,6 +123,15 @@
 "pref-err-block": "Una sessione + pausa supera le ore di studio giornaliere.",
 "day": "Giorno",
 "minutes": "minuti",
-"generated": "Generato"
+"generated": "Generato",
+"clear-plan": "Pulisci",
+"stat-total":    "Esami totali",
+"stat-upcoming": "In arrivo",
+"stat-completed":"Completati",
+"stat-next":     "Prossimo esame",
+"stat-none":     "Nessuno",
+"stat-today":    "Oggi!",
+"stat-tomorrow": "Domani!",
+"stat-days":     "giorni"
 
 }

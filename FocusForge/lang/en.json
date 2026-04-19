@@ -122,5 +122,14 @@
 "pref-err-block": "One session + break exceeds your total daily study hours.",
 "day": "Day",
 "minutes": "minutes",
-"generated": "Generated"
+"generated": "Generated",
+"clear-plan": "Clear",
+"stat-total":    "Total Exams",
+"stat-upcoming": "Upcoming",
+"stat-completed":"Completed",
+"stat-next":     "Next Exam",
+"stat-none":     "None",
+"stat-today":    "Today!",
+"stat-tomorrow": "Tomorrow",
+"stat-days":     "days"
 }

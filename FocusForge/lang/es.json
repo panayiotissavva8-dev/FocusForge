@@ -122,8 +122,16 @@
 "pref-err-block": "Una sesión + descanso supera tus horas diarias de estudio.",
 "day": "Día",
 "minutes": "minutos",
-"generated": "Generado"
-
+"generated": "Generado",
+"clear-plan": "Limpiar",
+"stat-total":    "Total Exams",
+"stat-upcoming": "Próximos",
+"stat-completed":"Completados",
+"stat-next":     "Próximo examen",
+"stat-none":     "Ninguno",
+"stat-today":    "¡Hoy!",
+"stat-tomorrow": "¡Mañana!",
+"stat-days":     "días"
 
 
 

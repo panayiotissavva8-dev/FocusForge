@@ -204,6 +204,18 @@ void initializeDatabase(sqlite3* db){
             );
 )";
 
+const char* study_plan_table = R"(
+    CREATE TABLE IF NOT EXISTS study_plans(
+     plan_id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id          INTEGER NOT NULL UNIQUE,
+        plan_json        TEXT NOT NULL,
+        preferences_json TEXT NOT NULL,
+        saved_at         INTEGER NOT NULL,
+        FOREIGN KEY(user_id) REFERENCES users(user_id)
+    );
+)";
+
+sqlite3_exec(db, study_plan_table, nullptr, nullptr, &errMsg);
 sqlite3_exec(db, users_table, nullptr, nullptr, &errMsg);
 sqlite3_exec(db, subject_table, nullptr, nullptr, &errMsg);
 
@@ -692,7 +704,7 @@ int main(){
     
 
     CROW_ROUTE(app, "/")([](){
-        ifstream file("web/html/login.html");
+        ifstream file("web/html/index.html");
         if(!file.is_open()) return crow::response(404);
         stringstream buffer;
         buffer << file.rdbuf();
@@ -1020,8 +1032,108 @@ int main(){
 
 
 
+// --- GET STUDY PLAN ---
+CROW_ROUTE(app, "/study_plan_api").methods(crow::HTTPMethod::GET)([](const crow::request& req){
+    auto token = req.get_header_value("Authorization");
+    if(token.empty() || sessions.find(token) == sessions.end())
+        return crow::response(401, "Not logged in");
+    int user_id = sessions[token].user_id;
 
-    // --- PATHS --- 
+    sqlite3_stmt* stmt;
+    const char* sql = "SELECT plan_json, preferences_json, saved_at FROM study_plans WHERE user_id = ?;";
+    if(sqlite3_prepare_v2(db_focus_forge, sql, -1, &stmt, nullptr) != SQLITE_OK)
+        return crow::response(500, "DB error");
+
+    sqlite3_bind_int(stmt, 1, user_id);
+
+    crow::json::wvalue out;
+    if(sqlite3_step(stmt) == SQLITE_ROW){
+        const char* plan     = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        const char* prefs    = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+        long long   saved_at = sqlite3_column_int64(stmt, 2);
+        out["plan_json"]        = plan ? plan : "";
+        out["preferences_json"] = prefs ? prefs : "";
+        out["saved_at"]         = saved_at;
+    } else {
+        out["plan_json"] = "";
+    }
+
+    sqlite3_finalize(stmt);
+    return crow::response(200, out);
+});
+
+// --- SAVE STUDY PLAN (INSERT OR REPLACE) ---
+CROW_ROUTE(app, "/study_plan_api").methods(crow::HTTPMethod::POST)([](const crow::request& req){
+    auto body = crow::json::load(req.body);
+    if(!body) return crow::response(400, "Invalid JSON");
+
+    auto token = req.get_header_value("Authorization");
+    if(token.empty() || sessions.find(token) == sessions.end())
+        return crow::response(401, "Not logged in");
+    int user_id = sessions[token].user_id;
+
+    std::string plan_json  = body["plan_json"].s();
+    std::string prefs_json = body["preferences_json"].s();
+    long long   saved_at   = static_cast<long long>(time(nullptr));
+
+    sqlite3_stmt* stmt;
+    const char* sql =
+        "INSERT INTO study_plans (user_id, plan_json, preferences_json, saved_at) "
+        "VALUES (?, ?, ?, ?) "
+        "ON CONFLICT(user_id) DO UPDATE SET "
+        "plan_json = excluded.plan_json, "
+        "preferences_json = excluded.preferences_json, "
+        "saved_at = excluded.saved_at;";
+
+    if(sqlite3_prepare_v2(db_focus_forge, sql, -1, &stmt, nullptr) != SQLITE_OK)
+        return crow::response(500, "DB error");
+
+    sqlite3_bind_int(stmt,    1, user_id);
+    sqlite3_bind_text(stmt,   2, plan_json.c_str(),  -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt,   3, prefs_json.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int64(stmt,  4, saved_at);
+
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    return crow::response(200, "Plan saved");
+});
+
+// --- DELETE STUDY PLAN ---
+CROW_ROUTE(app, "/study_plan_api").methods(crow::HTTPMethod::DELETE)([](const crow::request& req){
+    auto token = req.get_header_value("Authorization");
+    if(token.empty() || sessions.find(token) == sessions.end())
+        return crow::response(401, "Not logged in");
+    int user_id = sessions[token].user_id;
+
+    sqlite3_stmt* stmt;
+    const char* sql = "DELETE FROM study_plans WHERE user_id = ?;";
+    if(sqlite3_prepare_v2(db_focus_forge, sql, -1, &stmt, nullptr) != SQLITE_OK)
+        return crow::response(500, "DB error");
+
+    sqlite3_bind_int(stmt, 1, user_id);
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    return crow::response(200, "Plan cleared");
+});
+
+
+
+
+    // --- PATHS ---
+    
+    // --- INDEX PAGE ---
+     CROW_ROUTE(app, "/index")([](){
+        ifstream file("web/html/index.html", ios::binary);
+        if(!file.is_open()) return crow::response(404, "Cannot open index.html");
+
+        stringstream buffer;
+        buffer<<file.rdbuf();
+        crow::response res(buffer.str());
+        res.add_header("Content-Type", "text/html");
+        return res;
+    });
 
     // --- LOGIN PAGE ---
     CROW_ROUTE(app, "/login")([](){
@@ -1089,6 +1201,16 @@ int main(){
     return res;
 });
 
+/*
+// --- 404 PAGE ---
+CROW_ROUTE(app, "/<path>")([](std::string){
+    std::ifstream f("web/html/404.html", std::ios::binary);
+    std::stringstream b; b << f.rdbuf();
+    crow::response res(404, b.str());
+    res.add_header("Content-Type", "text/html");
+    return res;
+});
+*/
 
     // --- STATIC FILES ---
     app.route_dynamic("/web/<path>")([](const crow::request& req, std::string path){

@@ -49,8 +49,54 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="container">
+            <div id="stats-bar" style="
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:.75rem;
+    margin-bottom:1.5rem;">
+ 
+    <!-- Total Exams -->
+    <div class="exam-card" style="padding:1rem 1.25rem;">
+        <div style="font-size:.75rem;font-weight:500;
+                    color:var(--color-gray-500);margin-bottom:.25rem;"
+             data-i18n="stat-total">Total Exams</div>
+        <div id="stat-total"
+             style="font-size:1.75rem;font-weight:700;
+                    color:var(--color-gray-900);font-family:system-ui;">0</div>
+    </div>
+ 
+    <!-- Upcoming -->
+    <div class="exam-card" style="padding:1rem 1.25rem;">
+        <div style="font-size:.75rem;font-weight:500;
+                    color:var(--color-gray-500);margin-bottom:.25rem;"
+             data-i18n="stat-upcoming">Upcoming</div>
+        <div id="stat-upcoming"
+             style="font-size:1.75rem;font-weight:700;
+                    color:var(--color-primary);">0</div>
+    </div>
+ 
+    <!-- Completed -->
+    <div class="exam-card" style="padding:1rem 1.25rem;">
+        <div style="font-size:.75rem;font-weight:500;
+                    color:var(--color-gray-500);margin-bottom:.25rem;"
+             data-i18n="stat-completed">Completed</div>
+        <div id="stat-completed"
+             style="font-size:1.75rem;font-weight:700;
+                    color:#16a34a;">0</div>
+    </div>
+ 
+    <!-- Next Exam Countdown -->
+    <div class="exam-card" style="padding:1rem 1.25rem;">
+        <div style="font-size:.75rem;font-weight:500;
+                    color:var(--color-gray-500);margin-bottom:.25rem;"
+             data-i18n="stat-next">Next Exam</div>
+        <div id="stat-next"
+             style="font-size:1.25rem;font-weight:700;
+                    color:var(--color-gray-900);line-height:1.2;">—</div>
+    </div>
+</div>
             <!-- Tabs -->
-            <div class="tabs">
+              <div class="tabs">
                 <div class="tabs-list">
                     <button class="tab-trigger active" onclick="switchTab(event, 'upcoming')">
                         <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -202,7 +248,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                <button class="btn btn-outline" id="logoutBtn" onclick="window.location.href='/login'">
+                <button class="btn btn-outline" id="logoutBtn" onclick="logout()">
                     <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                         <polyline points="16 17 21 12 16 7"/>

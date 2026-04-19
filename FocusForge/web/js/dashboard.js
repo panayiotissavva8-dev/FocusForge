@@ -46,6 +46,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const savedLang = localStorage.getItem("language") || "en";
     await loadLanguage(savedLang);
+
+    const langSelect = document.getElementById("lanuage-select");
+    if(langSelect) {
+        langSelect.value = savedLang;
+    }
+
     
     // Load exams from backend
     loadExams();
@@ -352,6 +358,11 @@ async function loadLanguage(lang) {
     localStorage.setItem("language", lang);
 
     applyTranslations();
+
+     const langSelect = document.getElementById("language-select");
+     if (langSelect) {
+        langSelect.value = lang;
+    }
 }
 
 function applyTranslations() {
@@ -370,6 +381,13 @@ function applyTranslations() {
     });
 
     renderExams(); // Re-render exams to update any translated text
+}
+
+function logout() {
+   const logoutBtn = document.getElementById("logoutBtn");
+    localStorage.removeItem("sessionToken");
+    window.location.href = "/login";
+
 }
 
 
@@ -565,6 +583,8 @@ function renderExams() {
     // Update counts
     document.getElementById('upcoming-count').textContent = upcoming.length;
     document.getElementById('completed-count').textContent = completed.length;
+
+     updateStats();
     
     // Render upcoming exams
     const upcomingContainer = document.getElementById('upcoming-exams');
@@ -599,6 +619,8 @@ function renderExams() {
     } else {
         completedContainer.innerHTML = completed.map(exam => createExamCard(exam)).join('');
     }
+
+    updateStats()
 }
 
 
@@ -671,9 +693,25 @@ function _hourOptions(selected) {
 }
  
 // ── Render tab ───
-function renderStudyPlanTab() {
+ async function renderStudyPlanTab() {
     const el = document.getElementById("study-plan-root");
     if (!el) return;
+
+    if (!generatedPlan) {
+    try {
+        const res = await fetch("/study_plan_api", {
+            headers: { "Authorization": authToken }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.plan_json) {
+                const parsed = JSON.parse(data.plan_json);
+                generatedPlan = parsed.map(d => ({ ...d, date: new Date(d.date) }));
+                Object.assign(studyPreferences, JSON.parse(data.preferences_json || "{}"));
+            }
+        }
+    } catch(e) { console.warn("Could not load plan:", e); }
+}
  
     const today    = new Date(); today.setHours(0,0,0,0);
     const upcoming = exams.filter(e => !e.completed && new Date(e.date) > today);
@@ -875,10 +913,13 @@ function renderGeneratedPlan() {
  
     return `
     <div class="exam-card" style="border:2px solid var(--color-primary-light);">
-      <div class="card-header">
-        <div class="card-title">
+ 
+      <!-- CARD HEADER: title + buttons -->
+      <div class="card-header" style="flex-wrap:wrap;gap:.75rem;align-items:flex-start;">
+        <div class="card-title" style="flex:1;min-width:0;">
           <h3 style="display:flex;align-items:center;gap:.5rem;font-size:1rem;">
-            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
             </svg>
             ${translations["your-study-plan"] || "Your Personalized Study Plan"}
@@ -888,26 +929,42 @@ function renderGeneratedPlan() {
             ${studyPreferences.studyHoursPerDay}h ${translations["per-day"] || "per day"}
           </div>
         </div>
-        <button class="btn btn-outline" onclick="downloadStudyPlan()" style="flex-shrink:0;">
-          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          ${translations["download"] || "Download"}
-        </button>
-      </div>
+        <div style="display:flex;gap:.5rem;flex-shrink:0;align-items:center;">
+          <button class="btn btn-outline" onclick="downloadStudyPlan()">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            ${translations["download"] || "Download"}
+          </button>
+          <button class="btn btn-outline" onclick="clearStudyPlan()"
+                  style="border-color:var(--color-danger);color:var(--color-danger);">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+            ${translations["clear-plan"] || "Clear"}
+          </button>
+        </div>
+      </div><!-- END card-header -->
  
+      <!-- DAY CARDS -->
       <div class="card-body" style="padding-top:0;display:flex;flex-direction:column;gap:.75rem;">
         ${generatedPlan.map((day, i) => `
           <div style="border:1px solid var(--color-gray-200);
                       border-radius:var(--border-radius);overflow:hidden;">
+ 
+            <!-- Day header row -->
             <div style="background:var(--color-gray-50);padding:.75rem 1rem;
                         border-bottom:1px solid var(--color-gray-200);
                         display:flex;align-items:center;justify-content:space-between;">
               <div>
                 <div style="font-weight:600;color:var(--color-gray-900);font-size:.938rem;">
-                  ${translations["day"] || "Day"} ${i+1} &bull; ${getLocalizedWeekday(new Date(day.date))}
+                  ${translations["day"] || "Day"} ${i + 1} &bull;
+                  ${getLocalizedWeekday(new Date(day.date))}
                 </div>
                 <div style="font-size:.813rem;color:var(--color-gray-500);">
                   ${new Date(day.date).toLocaleDateString(getLocale(),
@@ -915,10 +972,12 @@ function renderGeneratedPlan() {
                 </div>
               </div>
               <span class="badge badge-none">
-                ${day.sessions.filter(s => s.type==="study").length}
+                ${day.sessions.filter(s => s.type === "study").length}
                 ${translations["sessions"] || "sessions"}
               </span>
             </div>
+ 
+            <!-- Sessions list -->
             <div style="padding:.75rem;display:flex;flex-direction:column;gap:.5rem;">
               ${day.sessions.map(s => s.type === "study" ? `
                 <div style="display:flex;gap:.75rem;padding:.75rem;
@@ -926,10 +985,15 @@ function renderGeneratedPlan() {
                             border:1px solid #bfdbfe;
                             border-radius:var(--border-radius);">
                   <div style="min-width:75px;font-size:.813rem;font-weight:600;
-                              color:var(--color-primary);white-space:nowrap;">${s.time}</div>
+                              color:var(--color-primary);white-space:nowrap;">
+                    ${s.time}
+                  </div>
                   <div>
-                    <div style="font-weight:600;color:var(--color-gray-900);font-size:.875rem;">${s.subject}</div>
-                    <div style="font-size:.813rem;color:var(--color-gray-600);">${getTopic(s.topicKey)}</div>
+                    <div style="font-weight:600;color:var(--color-gray-900);
+                                font-size:.875rem;">${s.subject}</div>
+                    <div style="font-size:.813rem;color:var(--color-gray-600);">
+                      ${getTopic(s.topicKey)}
+                    </div>
                     <div style="font-size:.75rem;color:var(--color-gray-500);margin-top:2px;">
                       ${s.duration} ${translations["minutes"] || "minutes"}
                     </div>
@@ -940,19 +1004,80 @@ function renderGeneratedPlan() {
                             background:var(--color-gray-50);
                             border:1px solid var(--color-gray-200);
                             border-radius:var(--border-radius);">
-                  <div style="min-width:75px;font-size:.813rem;color:var(--color-gray-500);
-                              white-space:nowrap;">${s.time}</div>
+                  <div style="min-width:75px;font-size:.813rem;
+                              color:var(--color-gray-500);white-space:nowrap;">
+                    ${s.time}
+                  </div>
                   <div style="font-size:.813rem;color:var(--color-gray-600);">
-                    ☕ ${translations["break"] || "Break"} (${s.duration} ${translations["minutes"] || "min"})
+                    ☕ ${translations["break"] || "Break"}
+                    (${s.duration} ${translations["minutes"] || "min"})
                   </div>
                 </div>
               `).join("")}
             </div>
+ 
           </div>
         `).join("")}
-      </div>
+      </div><!-- END card-body -->
+ 
     </div>`;
 }
+
+function updateStats() {
+    const today = new Date(); today.setHours(0,0,0,0);
+ 
+    const upcoming  = exams.filter(e => !e.completed && new Date(e.date) >= today);
+    const completed = exams.filter(e => e.completed);
+ 
+    // Total / Upcoming / Completed
+    const tEl = document.getElementById("stat-total");
+    const uEl = document.getElementById("stat-upcoming");
+    const cEl = document.getElementById("stat-completed");
+    const nEl = document.getElementById("stat-next");
+ 
+    if (tEl) tEl.textContent = exams.length;
+    if (uEl) uEl.textContent = upcoming.length;
+    if (cEl) cEl.textContent = completed.length;
+ 
+    if (nEl) {
+        if (upcoming.length === 0) {
+            nEl.textContent = translations["stat-none"] || "None";
+            nEl.style.fontSize = "1rem";
+        } else {
+            // Sort by date, pick soonest
+            const next = [...upcoming].sort((a,b) =>
+                new Date(a.date) - new Date(b.date)
+            )[0];
+ 
+            const daysLeft = Math.ceil(
+                (new Date(next.date) - today) / 86400000
+            );
+ 
+            const label = daysLeft === 0
+                ? (translations["stat-today"] || "Today!")
+                : daysLeft === 1
+                    ? (translations["stat-tomorrow"] || "Tomorrow")
+                    : `${daysLeft} ${translations["stat-days"] || "days"}`;
+ 
+            nEl.innerHTML = `
+                <div style="font-size:.875rem;font-weight:600;
+                            color:var(--color-gray-700);
+                            white-space:nowrap;overflow:hidden;
+                            text-overflow:ellipsis;max-width:100%;">
+                    ${next.subjectName}
+                </div>
+                <div style="font-size:.813rem;margin-top:2px;
+                            color:${daysLeft <= 3
+                                ? 'var(--color-danger)'
+                                : daysLeft <= 7
+                                    ? 'var(--color-warning)'
+                                    : 'var(--color-primary)'};">
+                    ${label}
+                </div>`;
+        }
+    }
+}
+
  
 // ── Generate ───────────
 async function generateStudyPlan() {
@@ -994,6 +1119,17 @@ async function generateStudyPlan() {
     */
  
     generatedPlan = _buildLocalPlan(upcoming, studyPreferences);
+
+    try {
+    await fetch("/study_plan_api", {
+        method : "POST",
+        headers: { "Content-Type": "application/json", "Authorization": authToken },
+        body   : JSON.stringify({
+            plan_json       : JSON.stringify(generatedPlan.map(d => ({ ...d, date: d.date.toISOString() }))),
+            preferences_json: JSON.stringify(studyPreferences)
+        })
+    });
+} catch(e) { console.warn("Could not save plan:", e); }
  
     isGeneratingPlan = false;
     renderStudyPlanTab();
@@ -1026,6 +1162,18 @@ function downloadStudyPlan() {
         { href: url, download: `study-plan-${studyPreferences.startDate}.txt` });
     document.body.appendChild(a); a.click();
     document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+// Clear Study Plan
+async function clearStudyPlan() {
+    try {
+        await fetch("/study_plan_api", {
+            method : "DELETE",
+            headers: { "Authorization": authToken }
+        });
+    } catch(e) { console.warn("Could not clear plan:", e); }
+    generatedPlan = null;
+    renderStudyPlanTab();
 }
  
 // ── Listeners ──────

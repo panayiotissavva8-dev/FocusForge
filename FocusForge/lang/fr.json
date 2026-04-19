@@ -123,6 +123,16 @@
 "pref-err-block": "Une session + pause dépasse vos heures d'étude quotidiennes.",
 "day": "Jour",
 "minutes": "minutes",
-"generated": "Généré"
+"generated": "Généré",
+"clear-plan": "Effacer",
+"stat-total":    "Total des examens",
+"stat-upcoming": "À venir",
+"stat-completed":"Terminés",
+"stat-next":     "Prochain examen",
+"stat-none":     "Aucun",
+"stat-today":    "Aujourd'hui",
+"stat-tomorrow": "Demain",
+"stat-days":     "jours"
+
 
 }

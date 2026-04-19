@@ -155,5 +155,48 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+     const AUTH_STRINGS = {
+            en: { title:"Sign in to your account", subtitle:"Manage your upcoming exams",
+                  username:"Username", password:"Password", sign:"Sign In",
+                  register:"Create Account", or:"or", google:"Continue with Google",
+                  userPh:"Enter your username", passPh:"Enter your password" },
+            es: { title:"Inicia sesión en tu cuenta", subtitle:"Gestiona tus próximos exámenes",
+                  username:"Usuario", password:"Contraseña", sign:"Iniciar sesión",
+                  register:"Crear cuenta", or:"o", google:"Continuar con Google",
+                  userPh:"Tu nombre de usuario", passPh:"Tu contraseña" },
+            fr: { title:"Connectez-vous", subtitle:"Gérez vos examens à venir",
+                  username:"Nom d'utilisateur", password:"Mot de passe", sign:"Se connecter",
+                  register:"Créer un compte", or:"ou", google:"Continuer avec Google",
+                  userPh:"Votre nom d'utilisateur", passPh:"Votre mot de passe" },
+            gr: { title:"Σύνδεση στον λογαριασμό σου", subtitle:"Διαχειρίσου τις επερχόμενες εξετάσεις",
+                  username:"Όνομα χρήστη", password:"Κωδικός", sign:"Σύνδεση",
+                  register:"Δημιουργία λογαριασμού", or:"ή", google:"Συνέχεια με Google",
+                  userPh:"Εισάγετε το όνομα χρήστη", passPh:"Εισάγετε τον κωδικό" },
+            it: { title:"Accedi al tuo account", subtitle:"Gestisci i tuoi prossimi esami",
+                  username:"Nome utente", password:"Password", sign:"Accedi",
+                  register:"Crea account", or:"oppure", google:"Continua con Google",
+                  userPh:"Il tuo nome utente", passPh:"La tua password" },
+        };
+ 
+        function changeAuthLanguage(lang) {
+            localStorage.setItem("language", lang);
+            const s = AUTH_STRINGS[lang] || AUTH_STRINGS.en;
+            document.getElementById("auth-title").textContent   = s.title;
+            document.getElementById("auth-subtitle").textContent = s.subtitle;
+            document.getElementById("lbl-username").textContent  = s.username;
+            document.getElementById("lbl-password").textContent  = s.password;
+            document.getElementById("sign").textContent          = s.sign;
+            document.getElementById("register").textContent      = s.register;
+            document.getElementById("auth-or").textContent       = s.or;
+            document.getElementById("auth-google").textContent   = s.google;
+            document.getElementById("username").placeholder      = s.userPh;
+            document.getElementById("password").placeholder      = s.passPh;
+        }
+ 
+        // Restore saved language on load
+        const savedLang = localStorage.getItem("language") || "en";
+        document.getElementById("auth-lang-select").value = savedLang;
+        changeAuthLanguage(savedLang);
+
 });
         

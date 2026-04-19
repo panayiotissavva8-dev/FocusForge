@@ -1,42 +1,104 @@
 <!DOCTYPE html>
-<html lang = "en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>FocusForge - Login</title>
-        <link rel="stylesheet" href="/web/css/login.css">
-        <link rel="stylesheet" href="/web/css/dashboard.css">
-        <link rel="stylesheet" href="https://googleapis.com">
-        <script type="module" src="/web/js/login.js" defer></script>
-         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    </head>
-    <body class="auth-page">
-        <div class="auth-container">
-            <h1>Welcome to FocusForge</h1>
-            <h2>Login</h2>
-
-            <label for="username">Username</label>
-            <input type="text" id="username" required minlength="6" maxlength="14">
-
-            <label for="password">Password</label>
-            <input type="password" id="password" required minlength="6" maxlength="20">
-
-            <button class="btn btn-primary btn-full" id="sign">Sign In</button>
-            <button class="btn btn-outline btn-full" id="register">Register</button>
-            <p class="choiceText">Or Sign In With</p>
-            <button class="btn btn-outline btn-full google-btn" id="googleLogin">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo">
-                Continue with Google
-            </button></button>
-            
-
-            <address>
-                Contact us: <a href="mailto:infoFocusForge@gmail.com">infoFocusForge@gmail.com</a>
-                <br>
-                <br>
-                 &copy: 2026 Northstack Ltd. All rights reserved.
-            </address>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusForge - Login</title>
+    <link rel="stylesheet" href="/web/css/login.css">
+    <link rel="stylesheet" href="/web/css/dashboard.css">
+    <script type="module" src="/web/js/login.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="auth-page">
+ 
+    <!-- Language switcher -->
+    <div class="lang-bar">
+        <svg style="width:1rem;height:1rem;color:var(--color-gray-500);"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10
+                     15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        <select id="auth-lang-select" onchange="changeAuthLanguage(this.value)">
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+            <option value="gr">Ελληνικά</option>
+            <option value="it">Italiano</option>
+        </select>
+    </div>
+ 
+    <div class="auth-container">
+ 
+        <!-- Brand -->
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;">
+            <svg style="width:2rem;height:2rem;color:var(--color-primary);"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+            <div>
+                <div style="font-size:1.25rem;font-weight:700;
+                            color:var(--color-gray-900);">FocusForge</div>
+                <div id="auth-subtitle" style="font-size:.813rem;
+                     color:var(--color-gray-500);">Manage your upcoming exams</div>
+            </div>
         </div>
-
-    </body>
+ 
+        <h2 id="auth-title" style="margin-bottom:1.5rem;">Sign in to your account</h2>
+ 
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+ 
+            <div>
+                <label for="username" id="lbl-username">Username</label>
+                <input type="text" id="username" class="input"
+                       required minlength="6" maxlength="14"
+                       placeholder="Enter your username"
+                       style="margin-top:.35rem;">
+            </div>
+ 
+            <div>
+                <label for="password" id="lbl-password">Password</label>
+                <input type="password" id="password" class="input"
+                       required minlength="6" maxlength="20"
+                       placeholder="Enter your password"
+                       style="margin-top:.35rem;">
+            </div>
+ 
+            <button class="btn btn-primary btn-full" id="sign"
+                    style="height:2.75rem;font-size:.938rem;margin-top:.25rem;">
+                Sign In
+            </button>
+ 
+            <button class="btn btn-outline btn-full" id="register"
+                    style="height:2.75rem;font-size:.938rem;">
+                Create Account
+            </button>
+ 
+        </div>
+ 
+        <div style="display:flex;align-items:center;gap:1rem;margin:1.25rem 0;">
+            <div style="flex:1;height:1px;background:var(--color-gray-200);"></div>
+            <span id="auth-or"
+                  style="font-size:.813rem;color:var(--color-gray-500);">or</span>
+            <div style="flex:1;height:1px;background:var(--color-gray-200);"></div>
+        </div>
+ 
+        <button class="btn btn-outline btn-full google-btn" id="googleLogin"
+                style="height:2.75rem;font-size:.938rem;">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                 alt="Google" style="width:1.125rem;height:1.125rem;">
+            <span id="auth-google">Continue with Google</span>
+        </button>
+ 
+        <address style="margin-top:2rem;font-size:.75rem;
+                        color:var(--color-gray-400);text-align:center;font-style:normal;">
+            <a href="mailto:infoFocusForge@gmail.com"
+               style="color:var(--color-gray-500);">Contact: infoFocusForge@gmail.com</a><br><br>
+            &copy; 2026 Northstack Ltd. All rights reserved.
+        </address>
+ 
+    </div>
+ </body>
 </html>

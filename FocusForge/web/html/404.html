@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusForge — Page Not Found</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #f9fafb;
+            color: #111827;
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center; padding: 2rem;
+        }
+        .code {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(5rem, 20vw, 9rem);
+            font-weight: 800;
+            color: #2563eb;
+            line-height: 1;
+            letter-spacing: -.04em;
+            margin-bottom: 1rem;
+        }
+        h1 {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(1.25rem, 3vw, 1.75rem);
+            font-weight: 700; color: #111827;
+            margin-bottom: .75rem;
+        }
+        p {
+            font-size: 1.0625rem; color: #6b7280;
+            max-width: 420px; line-height: 1.6;
+            margin-bottom: 2.5rem;
+        }
+        .actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+        .btn-primary {
+            padding: .75rem 1.75rem; background: #2563eb; color: #fff;
+            border-radius: .5rem; font-weight: 600; font-size: .938rem;
+            text-decoration: none; transition: background .2s;
+        }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-outline {
+            padding: .75rem 1.75rem; background: #fff; color: #374151;
+            border: 1.5px solid #e5e7eb; border-radius: .5rem;
+            font-weight: 600; font-size: .938rem;
+            text-decoration: none; transition: border-color .2s, color .2s;
+        }
+        .btn-outline:hover { border-color: #2563eb; color: #2563eb; }
+        .brand {
+            display: flex; align-items: center; gap: .5rem;
+            margin-bottom: 2rem;
+            font-family: 'Sora', sans-serif; font-weight: 700;
+            font-size: 1.125rem; color: #111827;
+        }
+        .brand svg { color: #2563eb; }
+    </style>
+</head>
+<body>
+    <div class="brand">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+        </svg>
+        FocusForge
+    </div>
+ 
+    <div class="code">404</div>
+    <h1>Page not found</h1>
+    <p>Looks like this page went off to study somewhere else.
+       Let's get you back on track.</p>
+ 
+    <div class="actions">
+        <a class="btn-primary" href="/dashboard">Go to Dashboard</a>
+        <a class="btn-outline" href="/">Back to Home</a>
+    </div>
+</body>
+</html>

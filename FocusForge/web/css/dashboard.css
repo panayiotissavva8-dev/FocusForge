@@ -569,9 +569,10 @@ h3 {
 }
 
 .tabs-list {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    max-width: 28rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 40rem;
     margin: 0 auto;
     background-color: var(--color-gray-100);
     border-radius: var(--border-radius);
@@ -1501,6 +1502,9 @@ button,
     to {
         transform: rotate(360deg);
     }
+}
+@media (max-width: 640px) {
+    #stats-bar { grid-template-columns: 1fr 1fr; }
 }
 
 
