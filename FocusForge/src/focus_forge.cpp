@@ -19,7 +19,7 @@
 
 
 sqlite3* db_focus_forge = nullptr;
-const std::string DB_PATH = "build/focus_forge.sqlite"; 
+const std::string DB_PATH = "data/focus_forge.sqlite"; 
 
 using namespace std;
 

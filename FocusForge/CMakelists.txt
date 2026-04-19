@@ -4,7 +4,7 @@ project(FocusForge)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(SQLite3 REQUIRED)
+find_package(unofficial-sqlite3 CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(cpr CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
@@ -15,7 +15,7 @@ add_executable(focusforge
 )
 
 target_link_libraries(focusforge PRIVATE
-    SQLite3::SQLite3
+    unofficial::sqlite3::sqlite3
     OpenSSL::SSL
     OpenSSL::Crypto
     cpr::cpr
