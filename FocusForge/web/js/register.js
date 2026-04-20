@@ -147,6 +147,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (response.ok) {
         window.location.href = "/login";
       }
+      if (!termsCheckbox.checked) {
+        Swal.fire({ title:"Error!", text:"You must agree to the Terms and Conditions!", icon:"error" });
+        return;
+      }
     } catch (err) {
       console.error(err);
     }
@@ -160,7 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ───────── GOOGLE LOGIN ─────────
   googleBtn?.addEventListener("click", async () => {
 
-     if (!cb.checked) {
+     if (!termsCheckbox.checked) {
                     const result = await Swal.fire({                        title: "Terms & Conditions",
                     text: "Please accept the Terms and Conditions to continue.",
                       icon: "warning",
@@ -170,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         confirmButtonColor: "#2563eb"
                     });
                     if (!result.isConfirmed) return;
-                    cb.checked = true;
+                    termsCheckbox.checked = true;
                     registerBtn.disabled = false;
                 }
 
