@@ -9,7 +9,7 @@ import {
 // Firebase INIT
 // ─────────────────────────────────────────────
 const firebaseConfig = {
-  apiKey: "AIzaSyCJzcI7xT5ZPEMUbK5WjAWYro5h0sGFbo",
+  apiKey: "AIzaSyCJzcI7xT5ZPEMUbK5dWjAWYro5h0sGFbo",
   authDomain: "focusforge-f2293.firebaseapp.com",
   projectId: "focusforge-f2293",
   appId: "1:7861425292:web:279f9d6ffea07780b217a9"
@@ -159,6 +159,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ───────── GOOGLE LOGIN ─────────
   googleBtn?.addEventListener("click", async () => {
+
+     if (!cb.checked) {
+                    const result = await Swal.fire({                        title: "Terms & Conditions",
+                    text: "Please accept the Terms and Conditions to continue.",
+                      icon: "warning",
+                      showCancelButton: true,
+                        confirmButtonText: "Accept & Continue",
+                        cancelButtonText: "Cancel",
+                        confirmButtonColor: "#2563eb"
+                    });
+                    if (!result.isConfirmed) return;
+                    cb.checked = true;
+                    registerBtn.disabled = false;
+                }
+
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
@@ -185,9 +200,13 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("sessionToken", data.token);
         localStorage.setItem("user_id", data.user_id);
         window.location.href = "/dashboard";
+      } else {
+        const text = await response.text();
+        Swal.fire({ title:"Login failed", text, icon:"error" });
       }
     } catch (error) {
       console.error("Google sign-in failed", error);
+      Swal.fire({ title:"Google sign-in failed", text: error.message || "Please try again.", icon:"error" });
     }
   });
 });
