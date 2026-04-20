@@ -179,7 +179,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
     try {
-      const result = await signInWithPopup(auth, provider);
+      const signInPromise = signInWithPopup(auth, provider);
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 30000));
+      const result = await Promise.race([signInPromise, timeoutPromise]);
       const user = result.user;
 
       const payload = {
@@ -198,19 +200,27 @@ document.addEventListener("DOMContentLoaded", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
+      console.time("Google login flow");
 
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem("sessionToken", data.token);
         localStorage.setItem("user_id", data.user_id);
+        Swal.fire({ title:"Login successful", text: "You have been logged in.", icon:"success" });
+        console.log("Google sign-in successful, session token stored.");
+        console.timeLog("Google login flow");
         window.location.href = "/dashboard";
       } else {
         const text = await response.text();
         Swal.fire({ title:"Login failed", text, icon:"error" });
       }
     } catch (error) {
-      console.error("Google sign-in failed", error);
-      Swal.fire({ title:"Google sign-in failed", text: error.message || "Please try again.", icon:"error" });
+      if (error.message === 'Timeout') {
+        Swal.fire({ title: "Timeout", text: "Sign-in took too long. Please try again.", icon: "error" });
+      } else {
+        console.error("Google sign-in failed", error);
+        Swal.fire({ title:"Google sign-in failed", text: error.message || "Please try again.", icon:"error" });
+      }
     }
   });
 });

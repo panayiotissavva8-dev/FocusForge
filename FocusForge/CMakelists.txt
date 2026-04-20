@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
  
 # Allow passing Crow include dir from Dockerfile (-DCROW_INCLUDE_DIR=/crow/include)
 if(NOT DEFINED CROW_INCLUDE_DIR)
-    set(CROW_INCLUDE_DIR "/crow/include")
+    set(CROW_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/Crow/include")
 endif()
  
 find_package(unofficial-sqlite3 CONFIG REQUIRED)
