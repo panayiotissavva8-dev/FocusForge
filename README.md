@@ -44,7 +44,7 @@ FocusForge helps students track upcoming exams, generate personalised AI study s
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/focusforge.git
+git clone https://github.com/panayiotissavva8-dev/focusforge.git
 cd focusforge
 ```
 
