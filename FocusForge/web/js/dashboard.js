@@ -1137,31 +1137,301 @@ async function generateStudyPlan() {
  
 // ── Download ──────
 function downloadStudyPlan() {
-    if (!generatedPlan) return;
-    let text = "=== FOCUS FORGE — STUDY PLAN ===\n\n";
-    text += `${translations["generated"] || "Generated"}: ${new Date().toLocaleDateString(getLocale())}\n\n`;
+    if (!generatedPlan || generatedPlan.length === 0) return;
  
-    generatedPlan.forEach((day, i) => {
-        text += `${"━".repeat(38)}\n`;
-        text += `${translations["day"] || "Day"} ${i+1}: ${getLocalizedWeekday(new Date(day.date))}, `;
-        text += `${new Date(day.date).toLocaleDateString(getLocale())}\n\n`;
-        day.sessions.forEach(s => {
-            if (s.type === "study") {
-                text += `  ${s.time}  ${s.subject}\n`;
-                text += `           ${getTopic(s.topicKey)}\n`;
-                text += `           ${s.duration} ${translations["minutes"] || "min"}\n\n`;
-            } else {
-                text += `  ${s.time}  ☕ ${translations["break"] || "Break"} (${s.duration} min)\n\n`;
-            }
-        });
-    });
+    // ── Colour helpers ────────────────────────────────────────
+    const BLUE       = "#2563eb";
+    const BLUE_LIGHT = "#dbeafe";
+    const BLUE_DARK  = "#1e40af";
+    const GRAY_50    = "#f9fafb";
+    const GRAY_100   = "#f3f4f6";
+    const GRAY_200   = "#e5e7eb";
+    const GRAY_500   = "#6b7280";
+    const GRAY_700   = "#374151";
+    const GRAY_900   = "#111827";
+    const GREEN      = "#16a34a";
+    const GREEN_LIGHT= "#dcfce7";
  
-    const blob = new Blob([text], { type: "text/plain" });
-    const url  = URL.createObjectURL(blob);
-    const a    = Object.assign(document.createElement("a"),
-        { href: url, download: `study-plan-${studyPreferences.startDate}.txt` });
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a); URL.revokeObjectURL(url);
+    // ── Stat pills at the top ─────────────────────────────────
+    const totalStudy  = generatedPlan.reduce(
+        (n, d) => n + d.sessions.filter(s => s.type === "study").length, 0);
+    const totalBreaks = generatedPlan.reduce(
+        (n, d) => n + d.sessions.filter(s => s.type === "break").length, 0);
+ 
+    // ── Build day cards HTML ──────────────────────────────────
+    function sessionRow(s) {
+        if (s.type === "study") {
+            return `
+            <tr>
+              <td style="padding:10px 12px;white-space:nowrap;
+                         font-weight:700;color:${BLUE};font-size:13px;">${s.time}</td>
+              <td style="padding:10px 12px;">
+                <div style="font-weight:700;color:${GRAY_900};font-size:14px;
+                            margin-bottom:2px;">${s.subject}</div>
+                <div style="color:${GRAY_500};font-size:12px;">${getTopic(s.topicKey)}</div>
+              </td>
+              <td style="padding:10px 12px;text-align:right;white-space:nowrap;
+                         color:${GRAY_500};font-size:12px;">${s.duration} min</td>
+            </tr>`;
+        }
+        return `
+            <tr style="background:${GRAY_50};">
+              <td style="padding:7px 12px;white-space:nowrap;
+                         color:${GRAY_500};font-size:12px;">${s.time}</td>
+              <td style="padding:7px 12px;color:${GRAY_500};font-size:12px;"
+                  colspan="2">☕ ${translations["break"] || "Break"} &nbsp;·&nbsp;
+                  ${s.duration} ${translations["minutes"] || "min"}</td>
+            </tr>`;
+    }
+ 
+    const dayCards = generatedPlan.map((day, i) => {
+        const studySessions = day.sessions.filter(s => s.type === "study");
+        return `
+        <div style="margin-bottom:20px;border-radius:12px;
+                    border:1px solid ${GRAY_200};overflow:hidden;
+                    page-break-inside:avoid;">
+ 
+          <!-- Day header -->
+          <div style="background:linear-gradient(135deg,${BLUE} 0%,${BLUE_DARK} 100%);
+                      padding:12px 18px;display:flex;
+                      justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-weight:700;color:#fff;font-size:15px;">
+                ${translations["day"] || "Day"} ${i + 1}
+                &nbsp;·&nbsp;${getLocalizedWeekday(new Date(day.date))}
+              </div>
+              <div style="color:rgba(255,255,255,.75);font-size:12px;margin-top:2px;">
+                ${new Date(day.date).toLocaleDateString(getLocale(),
+                    { month:"long", day:"numeric", year:"numeric" })}
+              </div>
+            </div>
+            <div style="background:rgba(255,255,255,.2);border-radius:20px;
+                        padding:4px 12px;color:#fff;font-size:12px;font-weight:600;">
+              ${studySessions.length} ${translations["sessions"] || "sessions"}
+            </div>
+          </div>
+ 
+          <!-- Sessions table -->
+          <table style="width:100%;border-collapse:collapse;">
+            <tbody>
+              ${day.sessions.map((s, si) => `
+                <tr style="background:${s.type === "study"
+                    ? (si % 2 === 0 ? BLUE_LIGHT : "#eff6ff")
+                    : GRAY_50};">
+                  <td style="padding:${s.type==="study"?"10px":"7px"} 12px;
+                             white-space:nowrap;
+                             font-weight:${s.type==="study"?"700":"400"};
+                             color:${s.type==="study"?BLUE:GRAY_500};
+                             font-size:${s.type==="study"?"13px":"12px"};
+                             width:85px;border-bottom:1px solid ${GRAY_200};">
+                    ${s.time}
+                  </td>
+                  ${s.type === "study" ? `
+                  <td style="padding:10px 12px;border-bottom:1px solid ${GRAY_200};">
+                    <div style="font-weight:700;color:${GRAY_900};font-size:14px;
+                                margin-bottom:2px;">${s.subject}</div>
+                    <div style="color:${GRAY_500};font-size:12px;">
+                      ${getTopic(s.topicKey)}</div>
+                  </td>
+                  <td style="padding:10px 12px;text-align:right;white-space:nowrap;
+                             color:${GRAY_500};font-size:12px;width:70px;
+                             border-bottom:1px solid ${GRAY_200};">
+                    ${s.duration}&nbsp;min
+                  </td>` : `
+                  <td colspan="2" style="padding:7px 12px;color:${GRAY_500};
+                             font-size:12px;border-bottom:1px solid ${GRAY_200};">
+                    ☕ ${translations["break"]||"Break"} &nbsp;·&nbsp;
+                    ${s.duration} ${translations["minutes"]||"min"}
+                  </td>`}
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>`;
+    }).join("");
+ 
+    // ── Full HTML document ─────────────────────────────────────
+    const html = `<!DOCTYPE html>
+<html lang="${currentLang || "en"}">
+<head>
+<meta charset="UTF-8"/>
+<title>FocusForge — Study Plan</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, sans-serif;
+    background: #fff;
+    color: ${GRAY_900};
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  @page {
+    size: A4;
+    margin: 18mm 16mm 18mm 16mm;
+  }
+  @media print {
+    body { background:#fff; }
+    .no-print { display:none !important; }
+  }
+  .page-wrap { max-width:700px; margin:0 auto; padding:24px 0; }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+ 
+  <!-- ── HEADER ── -->
+  <div style="background:linear-gradient(135deg,${BLUE} 0%,${BLUE_DARK} 100%);
+              border-radius:16px;padding:28px 32px;margin-bottom:24px;
+              display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+             stroke="white" stroke-width="2">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+        </svg>
+        <span style="font-size:22px;font-weight:800;color:#fff;
+                     letter-spacing:-.02em;">FocusForge</span>
+      </div>
+      <div style="color:rgba(255,255,255,.85);font-size:16px;font-weight:600;">
+        ${translations["your-study-plan"] || "Your Personalised Study Plan"}
+      </div>
+      <div style="color:rgba(255,255,255,.65);font-size:12px;margin-top:4px;">
+        ${translations["generated"] || "Generated"}: 
+        ${new Date().toLocaleDateString(getLocale(),
+            { weekday:"long", year:"numeric", month:"long", day:"numeric" })}
+      </div>
+    </div>
+    <div style="text-align:right;">
+      <div style="background:rgba(255,255,255,.15);border-radius:12px;
+                  padding:16px 20px;">
+        <div style="color:rgba(255,255,255,.75);font-size:11px;
+                    text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">
+          ${translations["days"] || "Days"}
+        </div>
+        <div style="color:#fff;font-size:32px;font-weight:800;line-height:1;">
+          ${generatedPlan.length}
+        </div>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- ── SUMMARY PILLS ── -->
+  <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;">
+ 
+    <div style="flex:1;min-width:110px;background:${BLUE_LIGHT};
+                border-radius:12px;padding:14px 16px;border:1px solid #bfdbfe;">
+      <div style="font-size:11px;color:${BLUE_DARK};font-weight:600;
+                  text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">
+        ${translations["study-hours"] || "Study Hours"}
+      </div>
+      <div style="font-size:22px;font-weight:800;color:${BLUE};">
+        ${studyPreferences.studyHoursPerDay}h
+      </div>
+      <div style="font-size:11px;color:${GRAY_500};margin-top:2px;">
+        ${translations["per-day"] || "per day"}
+      </div>
+    </div>
+ 
+    <div style="flex:1;min-width:110px;background:${GREEN_LIGHT};
+                border-radius:12px;padding:14px 16px;border:1px solid #86efac;">
+      <div style="font-size:11px;color:#166534;font-weight:600;
+                  text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">
+        ${translations["sessions"] || "Sessions"}
+      </div>
+      <div style="font-size:22px;font-weight:800;color:${GREEN};">
+        ${totalStudy}
+      </div>
+      <div style="font-size:11px;color:${GRAY_500};margin-top:2px;">
+        ${translations["stat-total"] || "total"}
+      </div>
+    </div>
+ 
+    <div style="flex:1;min-width:110px;background:${GRAY_100};
+                border-radius:12px;padding:14px 16px;border:1px solid ${GRAY_200};">
+      <div style="font-size:11px;color:${GRAY_700};font-weight:600;
+                  text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">
+        ${translations["session-length"] || "Session"}
+      </div>
+      <div style="font-size:22px;font-weight:800;color:${GRAY_900};">
+        ${studyPreferences.sessionLength}m
+      </div>
+      <div style="font-size:11px;color:${GRAY_500};margin-top:2px;">
+        + ${studyPreferences.breakDuration}m ${translations["break"]||"break"}
+      </div>
+    </div>
+ 
+    <div style="flex:1;min-width:110px;background:#fef3c7;
+                border-radius:12px;padding:14px 16px;border:1px solid #fde68a;">
+      <div style="font-size:11px;color:#92400e;font-weight:600;
+                  text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">
+        ${translations["study-window-start"]||"Window"}
+      </div>
+      <div style="font-size:16px;font-weight:800;color:#d97706;">
+        ${_fmt(studyPreferences.startHour)}
+      </div>
+      <div style="font-size:11px;color:${GRAY_500};margin-top:2px;">
+        → ${_fmt(studyPreferences.endHour)}
+      </div>
+    </div>
+ 
+  </div>
+ 
+  <!-- ── DAY CARDS ── -->
+  ${dayCards}
+ 
+  <!-- ── FOOTER ── -->
+  <div style="margin-top:28px;padding-top:16px;
+              border-top:1px solid ${GRAY_200};
+              display:flex;justify-content:space-between;align-items:center;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+           stroke="${BLUE}" stroke-width="2">
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+        <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+      </svg>
+      <span style="font-size:12px;font-weight:600;color:${GRAY_700};">FocusForge</span>
+    </div>
+    <div style="font-size:11px;color:${GRAY_500};">
+      focusforge.fly.dev
+    </div>
+  </div>
+ 
+  <!-- Print button (hidden when printing) -->
+  <div class="no-print" style="margin-top:24px;text-align:center;">
+    <button onclick="window.print()"
+            style="background:${BLUE};color:#fff;border:none;border-radius:8px;
+                   padding:12px 32px;font-size:15px;font-weight:600;
+                   cursor:pointer;box-shadow:0 4px 14px rgba(37,99,235,.35);">
+      ⬇ Save as PDF (Print → Save as PDF)
+    </button>
+    <div style="margin-top:8px;font-size:12px;color:${GRAY_500};">
+      In the print dialog, choose <strong>Save as PDF</strong> as the destination
+    </div>
+  </div>
+ 
+</div>
+</body>
+</html>`;
+ 
+    // ── Open in new tab, auto-trigger print ───────────────────
+    const win = window.open("", "_blank");
+    if (!win) {
+        // Popup blocked fallback — download as HTML
+        const blob = new Blob([html], { type: "text/html" });
+        const url  = URL.createObjectURL(blob);
+        const a    = Object.assign(document.createElement("a"),
+            { href: url, download: `study-plan-${studyPreferences.startDate}.html` });
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a); URL.revokeObjectURL(url);
+        return;
+    }
+    win.document.write(html);
+    win.document.close();
+ 
+    // Wait for content to render then trigger print dialog
+    win.onload = () => setTimeout(() => win.print(), 400);
 }
 
 // Clear Study Plan

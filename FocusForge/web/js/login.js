@@ -120,40 +120,42 @@ document.addEventListener("DOMContentLoaded", () => {
     setInterval(updateLoginState, 1000);
 
     const googleLogin = document.getElementById("googleLogin");
-    googleLogin.addEventListener("click", async function(){
-        try {
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-            const payload = { user: { uid: user.uid, email: user.email, displayName: user.displayName || user.email?.split("@")[0] || "GoogleUser" } };
+    if (googleLogin) {
+        googleLogin.addEventListener("click", async function(){
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                const payload = { user: { uid: user.uid, email: user.email, displayName: user.displayName || user.email?.split("@")[0] || "GoogleUser" } };
 
-            const response = await fetch("/google_api", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(payload)
-            });
+                const response = await fetch("/google_api", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(payload)
+                });
 
-            if(response.ok) {
-                const data = await response.json();
-                localStorage.setItem("sessionToken", data.token);
-                localStorage.setItem("user_id", data.user_id);
-                window.location.href = "/dashboard";
-            } else {
-                const text = await response.text();
+                if(response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem("sessionToken", data.token);
+                    localStorage.setItem("user_id", data.user_id);
+                    window.location.href = "/dashboard";
+                } else {
+                    const text = await response.text();
+                    Swal.fire({
+                        title: "Login failed",
+                        text: text,
+                        icon: "error"
+                    });
+                }
+            } catch (error) {
+                console.error("Google sign-in failed", error);
                 Swal.fire({
-                    title: "Login failed",
-                    text: text,
+                    title: "Google sign-in failed",
+                    text: error.message || "Please try again.",
                     icon: "error"
                 });
             }
-        } catch (error) {
-            console.error("Google sign-in failed", error);
-            Swal.fire({
-                title: "Google sign-in failed",
-                text: error.message || "Please try again.",
-                icon: "error"
-            });
-        }
-    });
+        });
+    }
 
      const AUTH_STRINGS = {
             en: { title:"Sign in to your account", subtitle:"Manage your upcoming exams",
