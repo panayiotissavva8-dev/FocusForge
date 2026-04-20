@@ -1503,7 +1503,7 @@ button,
         transform: rotate(360deg);
     }
 }
-@media (max-width: 640px) {
+@media (max-width: 500px) {
     #stats-bar { grid-template-columns: 1fr 1fr; }
 }
 
