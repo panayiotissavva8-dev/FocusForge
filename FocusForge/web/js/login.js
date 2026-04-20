@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const updateLoginState = () => {
         const now = Date.now();
 
-        // Reset cooldown if expired
+        // Reset cooldown if expired.
         if (cooldown_until && now >= cooldown_until) {
             resetCooldown();
         }
