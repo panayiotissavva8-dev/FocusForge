@@ -1247,7 +1247,7 @@ CROW_ROUTE(app, "/<path>")([](std::string){
 
 
     // --- RUN SERVER --- 
-    int port = 5001;
+    int port = 8080;
     if(const char* env_p = getenv("PORT")){
         string envPort = env_p;
         if(!envPort.empty()) {

@@ -1,39 +1,37 @@
-app = "focusforge"
-primary_region = "fra"
+# fly.toml app configuration file generated for focusforge-late-sky-9225 on 2026-04-20T06:47:22+03:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'focusforge-late-sky-9225'
+primary_region = 'lhr'
 
 [build]
+  dockerfile = 'Dockerfile'
 
 [env]
-  PORT = "8080"
+  PORT = '8080'
+
+[[mounts]]
+  source = 'focusforge_data'
+  destination = '/app/data'
 
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = "stop"
+  auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
 
-  [http_service.concurrency]
-    type = "connections"
-    soft_limit = 25
-    hard_limit = 50
-
-[[services]]
-  internal_port = 8080
-  protocol = "tcp"
-
-  [[services.ports]]
-    port = 80
-
-  [[services.ports]]
-    port = 443
-
-# Optional but recommended if you add a volume later
-# [[mounts]]
-#   source = "focusforge_data"
-#   destination = "/data"
+  [[http_service.checks]]
+    interval = '30s'
+    timeout = '5s'
+    grace_period = '10s'
+    method = 'GET'
+    path = '/'
 
 [[vm]]
-  memory = "1gb"
-  cpu_kind = "shared"
+  memory = '512mb'
+  cpu_kind = 'shared'
   cpus = 1
+  memory_mb = 512

@@ -1,24 +1,42 @@
 cmake_minimum_required(VERSION 3.16)
 project(FocusForge)
-
+ 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+ 
+# Allow passing Crow include dir from Dockerfile (-DCROW_INCLUDE_DIR=/crow/include)
+if(NOT DEFINED CROW_INCLUDE_DIR)
+    set(CROW_INCLUDE_DIR "/crow/include")
+endif()
+ 
 find_package(unofficial-sqlite3 CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(cpr CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(asio CONFIG REQUIRED)
 find_package(Threads REQUIRED)
-
+ 
 add_executable(focusforge
     src/focus_forge.cpp
 )
-
+ 
+# Crow is header-only — just add its include dir
+target_include_directories(focusforge PRIVATE
+    ${CROW_INCLUDE_DIR}
+)
+ 
 target_link_libraries(focusforge PRIVATE
     unofficial::sqlite3::sqlite3
     OpenSSL::SSL
     OpenSSL::Crypto
     cpr::cpr
     nlohmann_json::nlohmann_json
+    asio::asio
     Threads::Threads
+)
+ 
+# Crow requires these defines
+target_compile_definitions(focusforge PRIVATE
+    CROW_ENABLE_SSL
+    ASIO_STANDALONE
 )
