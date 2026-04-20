@@ -1,4 +1,4 @@
-# FocusForge 📚⚡
+# FocusForge 📚
 
 > AI-powered exam tracker and study planner built in C++ — made for [Hack Club Flavortown](https://flavortown.hackclub.com/)
 
