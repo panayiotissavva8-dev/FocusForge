@@ -49,21 +49,29 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="container">
-            <div id="stats-bar" style="
-    display:grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap:.75rem;
-    margin-bottom:1.5rem;">
- 
-    <!-- Total Exams -->
-    <div class="exam-card" style="padding:1rem 1.25rem;">
-        <div style="font-size:.75rem;font-weight:500;
-                    color:var(--color-gray-500);margin-bottom:.25rem;"
-             data-i18n="stat-total">Total Exams</div>
-        <div id="stat-total"
-             style="font-size:1.75rem;font-weight:700;
-                    color:var(--color-gray-900);font-family:system-ui;">0</div>
+            <div id="stats-bar">
+
+    <div class="exam-card stats-card">
+        <div class="stats-label" data-i18n="stat-total">Total Exams</div>
+        <div id="stat-total" class="stats-number">0</div>
     </div>
+
+    <div class="exam-card stats-card">
+        <div class="stats-label" data-i18n="stat-upcoming">Upcoming</div>
+        <div id="stat-upcoming" class="stats-number" style="color:var(--color-primary);">0</div>
+    </div>
+
+    <div class="exam-card stats-card">
+        <div class="stats-label" data-i18n="stat-completed">Completed</div>
+        <div id="stat-completed" class="stats-number" style="color:#16a34a;">0</div>
+    </div>
+
+    <div class="exam-card stats-card">
+        <div class="stats-label" data-i18n="stat-next">Next Exam</div>
+        <div id="stat-next" class="stats-number" style="font-size:1rem;">—</div>
+    </div>
+
+</div>
  
     <!-- Upcoming -->
     <div class="exam-card" style="padding:1rem 1.25rem;">
